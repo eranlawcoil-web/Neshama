@@ -1,14 +1,17 @@
 
+
 import React, { useState } from 'react';
-import { CreditCard, ShieldCheck, CheckCircle2, Lock } from 'lucide-react';
+import { CreditCard, ShieldCheck, Lock } from 'lucide-react';
 
 interface PaymentModalProps {
   profileName: string;
   onSuccess: () => void;
   onCancel: () => void;
+  price?: number;
+  originalPrice?: number;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ profileName, onSuccess, onCancel }) => {
+const PaymentModal: React.FC<PaymentModalProps> = ({ profileName, onSuccess, onCancel, price = 150, originalPrice = 300 }) => {
   const [loading, setLoading] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
@@ -36,7 +39,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ profileName, onSuccess, onC
              <div className="flex justify-between items-center mb-8 bg-stone-50 p-4 rounded-xl border border-stone-200">
                 <div>
                     <span className="block text-stone-500 text-xs mb-1">מנוי שנתי מתחדש</span>
-                    <span className="block text-stone-800 font-bold text-lg">₪150.00 <span className="text-sm font-normal text-stone-400">/ שנה</span></span>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-stone-800 font-bold text-lg">₪{price}</span>
+                        {originalPrice > price && (
+                             <span className="text-stone-400 text-sm line-through decoration-red-400 decoration-2">₪{originalPrice}</span>
+                        )}
+                        <span className="text-sm font-normal text-stone-400">/ שנה</span>
+                    </div>
                 </div>
                 <div className="bg-white p-2 rounded-full shadow-sm">
                     <ShieldCheck className="text-green-500" size={24}/>

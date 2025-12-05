@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { DeceasedProfile } from '../types';
 import { ChevronRight, ChevronLeft, Plus, ArrowLeft } from 'lucide-react';
@@ -14,8 +15,8 @@ const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelect
   const [activeIndex, setActiveIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
 
-  // Safely handle empty profiles
-  const displayProfiles = profiles && profiles.length > 0 ? profiles.slice(0, 5) : [];
+  // Use the profiles passed from App, which are now curated by "Community" logic
+  const displayProfiles = profiles && profiles.length > 0 ? profiles : [];
 
   const changeSlide = (direction: 'next' | 'prev') => {
     if (animating || displayProfiles.length === 0) return;

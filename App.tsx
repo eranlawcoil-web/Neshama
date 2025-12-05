@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { DeceasedProfile, Memory } from './types';
+import { DeceasedProfile, Memory, SystemConfig } from './types';
 import * as mockBackend from './services/mockBackend';
 import Timeline from './components/Timeline';
 import Hero from './components/Hero';
@@ -21,6 +21,7 @@ const App: React.FC = () => {
   // Data State
   const [profile, setProfile] = useState<DeceasedProfile | null>(null);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
 
   // Modal States
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -33,8 +34,13 @@ const App: React.FC = () => {
   // Initialize
   useEffect(() => {
     const user = mockBackend.getCurrentUserEmail();
+    setSystemConfig(mockBackend.getSystemConfig());
+
     if (user) {
       setCurrentUser(user);
+      if (mockBackend.isSuperAdmin(user)) {
+          setView('superAdmin');
+      }
     }
   }, []);
 
@@ -42,10 +48,7 @@ const App: React.FC = () => {
   useEffect(() => {
       if (view === 'profile' && profile) {
           // Log visit when entering a profile view
-          // We use a small timeout to ensure we don't log rapid switches or draft creations
           const timer = setTimeout(() => {
-              // Don't log admin's own visits to their own profile if we want strictly external usage,
-              // but request was "who entered", so logging everyone is safer.
               mockBackend.logVisit(profile, currentUser || undefined);
           }, 1000);
           return () => clearTimeout(timer);
@@ -53,7 +56,6 @@ const App: React.FC = () => {
   }, [profile?.id, view]);
 
   const handleStartCreate = () => {
-    // Create a new draft profile in memory
     const draft = mockBackend.createNewDraft();
     setProfile(draft);
     setView('profile');
@@ -78,7 +80,12 @@ const App: React.FC = () => {
     setCurrentUser(email);
     setShowAuthModal(false);
 
-    if (mockBackend.isSuperAdmin(email)) {
+    // Refresh Config just in case
+    const updatedConfig = mockBackend.getSystemConfig();
+    setSystemConfig(updatedConfig);
+
+    // Priority Check: Super Admin
+    if (updatedConfig.superAdminEmails.includes(email)) {
         setView('superAdmin');
         return;
     }
@@ -97,7 +104,6 @@ const App: React.FC = () => {
         if (profile && profile.email === email) {
             // Force refresh of isAdmin calculation
             setCurrentUser(email);
-            // We are already on the correct profile, just stay there.
         } else {
             // Just logged in generally. Try to load their personal profile if exists
             const allProfiles = mockBackend.getProfiles();
@@ -106,7 +112,6 @@ const App: React.FC = () => {
                 setProfile(userProfile);
                 setView('profile');
             } else {
-                 // If the user doesn't have a profile and wasn't viewing one they own
                  if (!profile) {
                      const confirmCreate = window.confirm('לא נמצא אתר קיים למשתמש זה. האם ברצונך ליצור אתר חדש?');
                      if (confirmCreate) {
@@ -236,7 +241,8 @@ const App: React.FC = () => {
       return (
           <>
             <Landing 
-                profiles={mockBackend.getProfiles().filter(p => p.isPublic)} 
+                // Pass filtered/sorted community profiles
+                profiles={mockBackend.getCommunityProfiles()} 
                 onCreate={handleStartCreate}
                 onSelectProfile={handleSelectProfile}
                 onLogin={() => {
@@ -259,6 +265,8 @@ const App: React.FC = () => {
 
   // Admin logic: 
   const isAdmin = (currentUser && currentUser === profile.email) || (profile.isDraft === true && !profile.email);
+  const currentPrice = systemConfig?.pricing.currentPrice || 150;
+  const originalPrice = systemConfig?.pricing.originalPrice || 300;
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans pb-20">
@@ -275,7 +283,7 @@ const App: React.FC = () => {
                 <span className="font-bold text-sm">חזרה לאתר ההנצחה</span>
              </button>
 
-             {/* Site Name (Hidden on small screens if back button is present) */}
+             {/* Site Name */}
              <div className="hidden md:block text-xl font-bold font-serif-hebrew text-amber-600 opacity-80">
                 {profile.fullName}
              </div>
@@ -290,7 +298,6 @@ const App: React.FC = () => {
         <div className="flex items-center gap-3">
           {currentUser ? (
              <div className="flex items-center gap-3">
-                 {/* Show user email briefly or icon */}
                  <span className="text-xs text-stone-400 hidden md:inline">{currentUser}</span>
                  <button 
                   onClick={() => {
@@ -364,7 +371,7 @@ const App: React.FC = () => {
                     className="bg-amber-500 hover:bg-amber-400 text-stone-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
                   >
                       <ShoppingCart size={20}/>
-                      רכוש מנוי והפץ (₪150/שנה)
+                      רכוש מנוי והפץ (₪{currentPrice}/שנה)
                   </button>
               )}
           </div>
@@ -398,7 +405,6 @@ const App: React.FC = () => {
         <RelatedProfiles relatedPeople={profile.familyMembers} />
       )}
 
-      {/* Floating Action Button for adding memories (Only if Admin or Public) */}
       {(isAdmin || profile.isPublic) && (
           <button
             onClick={() => setShowMemoryForm(true)}
@@ -441,6 +447,8 @@ const App: React.FC = () => {
       {showPaymentModal && profile && (
           <PaymentModal 
             profileName={profile.fullName}
+            price={currentPrice}
+            originalPrice={originalPrice}
             onSuccess={handlePaymentSuccess}
             onCancel={() => setShowPaymentModal(false)}
           />

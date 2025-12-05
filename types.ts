@@ -50,6 +50,11 @@ export interface DeceasedProfile {
   isDraft?: boolean; // True during initial creation before first save
   subscriptionExpiry?: number;
   accountType?: 'free' | 'standard'; // 'free' = VIP/Community (No payment needed), 'standard' = Needs payment
+  
+  // Marketing & Updates
+  showInCommunity?: boolean; // Manually force to show in carousel
+  lastUpdated?: number;
+  lastUpdatedBy?: string;
 }
 
 export interface User {
@@ -63,4 +68,14 @@ export interface VisitLog {
     profileName: string;
     visitorEmail: string; // "Guest" or email
     timestamp: number;
+    actionType: 'visit' | 'update' | 'create'; // To distinguish simple visits from edits
+}
+
+export interface SystemConfig {
+    superAdminEmails: string[];
+    pricing: {
+        originalPrice: number; // e.g. 300 (Crossed out)
+        currentPrice: number;  // e.g. 150 (Actual)
+        currency: string;
+    };
 }
