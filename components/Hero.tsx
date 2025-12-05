@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { DeceasedProfile, RelatedPerson } from '../types';
-import { Camera, Edit3, Wand2, Loader2, Info, Play, Music, MapPin, Calendar, X, Navigation, Save, Users, Plus, Trash2, Share2, Check, Flame } from 'lucide-react';
+import { Camera, Edit3, Wand2, Loader2, Info, Play, Music, Navigation, Save, Users, Plus, Trash2, Share2, Check, Flame, Calendar, MapPin, X } from 'lucide-react';
 import { generateTribute } from '../services/geminiService';
 
 interface HeroProps {
@@ -10,9 +10,11 @@ interface HeroProps {
   isAdmin: boolean;
   onUpdateProfile: (updated: Partial<DeceasedProfile>) => void;
   onPlayStory: () => void;
+  isCandleLit: boolean;
+  setIsCandleLit: (lit: boolean) => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlayStory }) => {
+const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlayStory, isCandleLit, setIsCandleLit }) => {
   const [isEditingMode, setIsEditingMode] = useState(false);
   
   // Local state for editing form
@@ -30,9 +32,6 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
   const [isGenerating, setIsGenerating] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
-  
-  // Candle State
-  const [isCandleLit, setIsCandleLit] = useState(false);
 
   // Edit fields for Info Modal (Location, Playlist etc)
   const [extraInfo, setExtraInfo] = useState({
@@ -182,6 +181,18 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
         <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/60 to-black/40"></div>
       </div>
       
+      {/* Custom Flicker Animation Style */}
+      <style>{`
+        @keyframes flame-flicker {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
+            10% { transform: translateX(-51%) scale(1.02); opacity: 0.8; }
+            20% { transform: translateX(-49%) scale(1.05); opacity: 1; }
+            40% { transform: translateX(-50%) scale(0.98); opacity: 0.85; }
+            60% { transform: translateX(-52%) scale(1.03); opacity: 1; }
+            80% { transform: translateX(-48%) scale(0.95); opacity: 0.9; }
+        }
+      `}</style>
+
       {/* Memorial Candle */}
       <div className="absolute top-24 left-4 z-20 md:top-32 md:left-12">
         <div className="flex flex-col items-center gap-2">
@@ -192,9 +203,18 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
             >
                 {/* Flame Animation */}
                 {isCandleLit ? (
-                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-4 h-8 bg-orange-400 rounded-full blur-[2px] animate-pulse">
-                        <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-yellow-200 rounded-full blur-[1px]"></div>
-                    </div>
+                    <>
+                        {/* Outer Glow */}
+                        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-orange-500/30 rounded-full blur-xl animate-pulse"></div>
+                        {/* Core Flame */}
+                        <div 
+                            className="absolute -top-6 left-1/2 w-4 h-8 bg-gradient-to-t from-orange-600 via-orange-400 to-yellow-100 rounded-full blur-[1px] origin-bottom shadow-lg shadow-orange-500/50"
+                            style={{ animation: 'flame-flicker 2s infinite linear' }}
+                        >
+                            {/* Inner Blue Base */}
+                            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1.5 h-2.5 bg-blue-500/40 rounded-full blur-[1px]"></div>
+                        </div>
+                    </>
                 ) : (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-1 h-3 bg-stone-900 rounded-full"></div>
                 )}
@@ -204,8 +224,8 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
                    <Flame size={isCandleLit ? 24 : 20} className={`transition-colors duration-700 ${isCandleLit ? 'text-amber-500 opacity-50' : 'text-stone-500'}`} />
                 </div>
             </button>
-            <span className={`text-xs font-bold transition-opacity duration-700 ${isCandleLit ? 'text-amber-400 opacity-100' : 'text-stone-500 opacity-0 group-hover:opacity-100'}`}>
-                {isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר'}
+            <span className={`text-[10px] md:text-xs font-bold transition-opacity duration-700 text-center max-w-[100px] leading-tight ${isCandleLit ? 'text-amber-400 opacity-100' : 'text-stone-500 opacity-100'}`}>
+                {isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר לעילוי הנשמה'}
             </span>
         </div>
       </div>
@@ -411,28 +431,31 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-center gap-4 mb-4 group">
+            <div className="flex items-center justify-center gap-4 mb-4 group relative">
               <h1 className="text-5xl md:text-8xl font-serif-hebrew font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-200 to-amber-500 drop-shadow-sm leading-tight">
                 {profile.fullName}
               </h1>
-              {isAdmin && (
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+              
+              <div className="flex gap-2 absolute left-0 md:-left-24 top-1/2 -translate-y-1/2">
+                {isAdmin && (
                     <button
                       onClick={handleStartEdit}
-                      className="bg-white/10 hover:bg-white/20 text-amber-500 hover:text-amber-400 p-3 rounded-full backdrop-blur shadow-lg border border-white/5"
+                      className="bg-white/10 hover:bg-white/20 text-amber-500 hover:text-amber-400 p-3 rounded-full backdrop-blur shadow-lg border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity"
                       title="ערוך פרטים"
                     >
                       <Edit3 size={24} />
                     </button>
-                    <button
-                      onClick={handleShare}
-                      className="bg-white/10 hover:bg-white/20 text-amber-500 hover:text-amber-400 p-3 rounded-full backdrop-blur shadow-lg border border-white/5"
-                      title="העתק קישור"
-                    >
-                      {showCopied ? <Check size={24} /> : <Share2 size={24} />}
-                    </button>
-                </div>
-              )}
+                )}
+                
+                {/* Share Button - Visible to everyone */}
+                <button
+                  onClick={handleShare}
+                  className="bg-white/10 hover:bg-white/20 text-stone-300 hover:text-amber-400 p-3 rounded-full backdrop-blur shadow-lg border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="העתק קישור לאתר"
+                >
+                  {showCopied ? <Check size={24} /> : <Share2 size={24} />}
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center gap-4 text-xl md:text-2xl text-stone-300 font-light tracking-widest mb-6 dir-ltr opacity-90">

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { DeceasedProfile } from '../types';
-import { ChevronRight, ChevronLeft, Plus, ArrowLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Plus, ArrowLeft, Share2, Check } from 'lucide-react';
 
 interface LandingProps {
   profiles: DeceasedProfile[];
@@ -14,6 +14,7 @@ interface LandingProps {
 const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelectProfile }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
 
   // Use the profiles passed from App, which are now curated by "Community" logic
   const displayProfiles = profiles && profiles.length > 0 ? profiles : [];
@@ -35,6 +36,12 @@ const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelect
     return () => clearInterval(timer);
   }, [activeIndex, displayProfiles.length]);
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 2000);
+  };
+
   const currentProfile = displayProfiles.length > 0 ? displayProfiles[activeIndex] : null;
 
   return (
@@ -48,8 +55,15 @@ const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelect
          >
             אתר הנצחה
          </div>
-         <div className="flex gap-6 items-center">
-            <button onClick={onLogin} className="text-sm font-bold text-stone-300 hover:text-white transition-colors uppercase tracking-widest">
+         <div className="flex gap-4 md:gap-6 items-center">
+            <button 
+                onClick={handleShare}
+                className="text-stone-300 hover:text-white transition-colors"
+                title="שתף אתר"
+            >
+                {showCopied ? <Check size={20} className="text-green-400" /> : <Share2 size={20} />}
+            </button>
+            <button onClick={onLogin} className="text-sm font-bold text-stone-300 hover:text-white transition-colors uppercase tracking-widest hidden md:block">
                 כניסה למנויים
             </button>
             <button 

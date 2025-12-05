@@ -12,7 +12,7 @@ import Landing from './components/Landing';
 import AuthModal from './components/AuthModal';
 import PaymentModal from './components/PaymentModal';
 import SuperAdminDashboard from './components/SuperAdminDashboard';
-import { LogIn, LogOut, Plus, ShieldAlert, ShoppingCart, Eye, ArrowRight, Settings, Gift, CheckCircle } from 'lucide-react';
+import { LogIn, LogOut, Plus, ShieldAlert, ShoppingCart, Eye, ArrowRight, Settings, Gift, CheckCircle, Flame } from 'lucide-react';
 
 const App: React.FC = () => {
   // Navigation State
@@ -30,6 +30,10 @@ const App: React.FC = () => {
   const [showMemoryForm, setShowMemoryForm] = useState(false);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
   const [showStory, setShowStory] = useState(false);
+
+  // Scroll & Sticky State
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isCandleLit, setIsCandleLit] = useState(false);
 
   // Initialize
   useEffect(() => {
@@ -54,6 +58,20 @@ const App: React.FC = () => {
           return () => clearTimeout(timer);
       }
   }, [profile?.id, view]);
+
+  // Handle Scroll for Sticky Header
+  useEffect(() => {
+      const handleScroll = () => {
+          setIsScrolled(window.scrollY > 400); // 400px threshold approx hero height
+      };
+      
+      if (view === 'profile') {
+        window.addEventListener('scroll', handleScroll);
+      } else {
+        setIsScrolled(false);
+      }
+      return () => window.removeEventListener('scroll', handleScroll);
+  }, [view]);
 
   const handleStartCreate = () => {
     const draft = mockBackend.createNewDraft();
@@ -271,75 +289,109 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans pb-20">
       
-      {/* Navbar */}
-      <nav className="fixed top-0 w-full z-40 bg-white/10 backdrop-blur-md border-b border-white/10 px-4 py-3 flex justify-between items-center transition-all hover:bg-white/95 hover:shadow-md group">
-        <div className="flex items-center gap-4">
-             {/* Back to Home Button */}
-             <button 
-                onClick={() => setView('landing')} 
-                className="flex items-center gap-2 text-stone-600 hover:text-amber-600 transition-colors bg-white/50 px-3 py-1.5 rounded-full hover:bg-white"
-             >
-                <ArrowRight size={18} />
-                <span className="font-bold text-sm">חזרה לאתר ההנצחה</span>
-             </button>
+      {/* Navbar - Sticky & Dynamic */}
+      <nav 
+        className={`fixed top-0 w-full z-50 border-b transition-all duration-300 group
+            ${isScrolled 
+                ? 'bg-white/95 backdrop-blur-md shadow-md border-stone-200 py-3 md:py-4' 
+                : 'bg-white/10 backdrop-blur-md border-white/10 py-4 hover:bg-white/95'
+            }
+        `}
+      >
+        <div className="px-6 flex justify-between items-center w-full">
+            <div className="flex items-center gap-6 flex-1">
+                {/* Back to Home Button */}
+                <button 
+                    onClick={() => setView('landing')} 
+                    className={`flex items-center gap-2 transition-colors px-4 py-2 rounded-full hover:bg-white shrink-0 ${isScrolled ? 'text-stone-600 bg-stone-100' : 'text-stone-600 bg-white/50'}`}
+                >
+                    <ArrowRight size={20} />
+                    <span className="font-bold text-base hidden xl:inline">חזרה לאתר ההנצחה</span>
+                </button>
 
-             {/* Site Name */}
-             <div className="hidden md:block text-xl font-bold font-serif-hebrew text-amber-600 opacity-80">
-                {profile.fullName}
-             </div>
+                {/* Sticky Profile Info - Slides in when scrolled */}
+                <div className={`flex items-center gap-4 transition-all duration-500 flex-1 ${isScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 hidden'}`}>
+                    <img 
+                        src={profile.heroImage} 
+                        alt={profile.fullName} 
+                        className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-amber-500 shadow-sm shrink-0"
+                    />
+                    <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-6">
+                        <span className="font-serif-hebrew font-bold text-stone-900 text-xl md:text-3xl leading-none whitespace-nowrap">{profile.fullName}</span>
+                        
+                        {profile.isPublic && (
+                             <button 
+                                onClick={() => setIsCandleLit(true)}
+                                className="flex items-center gap-2 bg-stone-100 hover:bg-amber-50 px-3 py-1 rounded-full transition-colors w-fit"
+                             >
+                                <Flame size={18} className={isCandleLit ? 'text-amber-500 fill-amber-500 animate-pulse' : 'text-stone-400'} />
+                                <span className={`text-sm font-bold ${isCandleLit ? 'text-amber-600' : 'text-stone-500'}`}>
+                                    {isCandleLit ? 'נר דולק' : 'הדלק נר'}
+                                </span>
+                             </button>
+                        )}
+                    </div>
+                </div>
 
-            {!profile.isPublic && (
-                <span className="bg-stone-200 text-stone-600 text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1">
-                    <Eye size={12}/> טיוטה
-                </span>
+                {!isScrolled && (
+                    <div className="hidden md:block text-2xl font-bold font-serif-hebrew text-amber-600 opacity-80 absolute left-1/2 transform -translate-x-1/2">
+                        {profile.fullName}
+                    </div>
+                )}
+
+                {!profile.isPublic && (
+                    <span className="bg-stone-200 text-stone-600 text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1 shrink-0">
+                        <Eye size={12}/> טיוטה
+                    </span>
+                )}
+            </div>
+        
+            <div className="flex items-center gap-3 shrink-0">
+            {currentUser ? (
+                <div className="flex items-center gap-3">
+                    <span className={`text-xs hidden md:inline ${isScrolled ? 'text-stone-500' : 'text-stone-300 group-hover:text-stone-500'}`}>{currentUser}</span>
+                    <button 
+                        onClick={() => {
+                            mockBackend.logoutMock();
+                            setCurrentUser(null);
+                            setView('landing');
+                        }}
+                        className="flex items-center gap-2 text-sm text-stone-600 hover:text-red-500 transition-colors"
+                    >
+                        <LogOut size={18} />
+                        <span className="hidden md:inline">התנתק</span>
+                    </button>
+                </div>
+            ) : (
+                <div className="flex items-center gap-2">
+                    <button 
+                        onClick={() => {
+                            setAuthMode('login');
+                            setShowAuthModal(true);
+                        }}
+                        className="bg-stone-800 text-white text-xs md:text-sm px-3 py-2 rounded-lg hover:bg-black transition-colors flex items-center gap-2 shadow-lg"
+                    >
+                        <Settings size={14} />
+                        <span>ניהול אתר הנצחה</span>
+                    </button>
+                </div>
             )}
-        </div>
-       
-        <div className="flex items-center gap-3">
-          {currentUser ? (
-             <div className="flex items-center gap-3">
-                 <span className="text-xs text-stone-400 hidden md:inline">{currentUser}</span>
-                 <button 
-                  onClick={() => {
-                      mockBackend.logoutMock();
-                      setCurrentUser(null);
-                      setView('landing');
-                  }}
-                  className="flex items-center gap-2 text-sm text-stone-600 hover:text-red-500 transition-colors"
-                >
-                  <LogOut size={18} />
-                  <span className="hidden md:inline">התנתק</span>
-                </button>
-             </div>
-          ) : (
-             <div className="flex items-center gap-2">
-                 <button 
-                  onClick={() => {
-                      setAuthMode('login');
-                      setShowAuthModal(true);
-                  }}
-                  className="bg-stone-800 text-white text-xs md:text-sm px-3 py-2 rounded-lg hover:bg-black transition-colors flex items-center gap-2 shadow-lg"
-                >
-                  <Settings size={14} />
-                  <span>ניהול אתר הנצחה</span>
-                </button>
-             </div>
-          )}
 
-          {!currentUser && (
-              <button 
-                onClick={handleSaveRequest}
-                className="bg-amber-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-amber-700 transition-colors"
-              >
-                  שמור טיוטה
-              </button>
-          )}
+            {!currentUser && (
+                <button 
+                    onClick={handleSaveRequest}
+                    className="bg-amber-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-amber-700 transition-colors"
+                >
+                    שמור טיוטה
+                </button>
+            )}
+            </div>
         </div>
       </nav>
 
       {/* Trial / Payment Banner */}
       {isAdmin && !profile.isPublic && (
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-stone-900 text-white p-4 flex flex-col md:flex-row items-center justify-between gap-4 border-t-4 border-amber-500 shadow-2xl animate-in slide-in-from-bottom-full">
+          <div className="fixed bottom-0 left-0 right-0 z-[60] bg-stone-900 text-white p-4 flex flex-col md:flex-row items-center justify-between gap-4 border-t-4 border-amber-500 shadow-2xl animate-in slide-in-from-bottom-full">
               <div className="flex items-center gap-3">
                   <div className="bg-amber-500 p-2 rounded-full text-stone-900">
                       <ShieldAlert size={24} />
@@ -371,7 +423,13 @@ const App: React.FC = () => {
                     className="bg-amber-500 hover:bg-amber-400 text-stone-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
                   >
                       <ShoppingCart size={20}/>
-                      רכוש מנוי והפץ (₪{currentPrice}/שנה)
+                      <span>רכוש מנוי והפץ</span>
+                      <div className="flex items-center gap-1 bg-stone-900/10 px-2 rounded-full">
+                          {originalPrice > currentPrice && (
+                            <span className="text-stone-700 line-through text-xs decoration-red-500">₪{originalPrice}</span>
+                          )}
+                          <span>₪{currentPrice}/שנה</span>
+                      </div>
                   </button>
               )}
           </div>
@@ -383,6 +441,8 @@ const App: React.FC = () => {
         isAdmin={isAdmin} 
         onUpdateProfile={handleUpdateProfile}
         onPlayStory={() => setShowStory(true)}
+        isCandleLit={isCandleLit}
+        setIsCandleLit={setIsCandleLit}
       />
 
       {/* Main Content - Timeline */}
