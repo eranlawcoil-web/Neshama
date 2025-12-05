@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { DeceasedProfile, Memory } from './types';
 import * as mockBackend from './services/mockBackend';
@@ -7,58 +8,138 @@ import Hero from './components/Hero';
 import MemoryForm from './components/MemoryForm';
 import StoryViewer from './components/StoryViewer';
 import RelatedProfiles from './components/RelatedProfiles';
-import { LogIn, LogOut, Plus } from 'lucide-react';
+import Landing from './components/Landing';
+import AuthModal from './components/AuthModal';
+import PaymentModal from './components/PaymentModal';
+import SuperAdminDashboard from './components/SuperAdminDashboard';
+import { LogIn, LogOut, Plus, ShieldAlert, ShoppingCart, Eye, ArrowRight, Settings } from 'lucide-react';
 
 const App: React.FC = () => {
-  // State
+  // Navigation State
+  const [view, setView] = useState<'landing' | 'profile' | 'superAdmin'>('landing');
+
+  // Data State
   const [profile, setProfile] = useState<DeceasedProfile | null>(null);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
+
+  // Modal States
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authEmail, setAuthEmail] = useState('');
+  const [authMode, setAuthMode] = useState<'login' | 'save'>('login');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showMemoryForm, setShowMemoryForm] = useState(false);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
   const [showStory, setShowStory] = useState(false);
 
   // Initialize
   useEffect(() => {
-    // Load the first profile for demo purposes
-    const profiles = mockBackend.getProfiles();
-    if (profiles.length > 0) {
-      setProfile(profiles[0]);
-    }
-
-    // Check auth
     const user = mockBackend.getCurrentUserEmail();
     if (user) {
       setCurrentUser(user);
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mockBackend.loginMock(authEmail)) {
-      setCurrentUser(authEmail);
-      setShowAuthModal(false);
-      setAuthEmail('');
-    } else {
-      alert('משתמש לא נמצא. נסה: admin@demo.com');
+  const handleStartCreate = () => {
+    // Create a new draft profile in memory
+    const draft = mockBackend.createNewDraft();
+    setProfile(draft);
+    setView('profile');
+  };
+
+  const handleSelectProfile = (id: string) => {
+    try {
+        const selected = mockBackend.getProfileById(id);
+        if (selected) {
+            setProfile(selected);
+            setView('profile');
+        } else {
+            console.error("Profile not found");
+        }
+    } catch (e) {
+        console.error("Error selecting profile", e);
     }
   };
 
-  const handleLogout = () => {
-    mockBackend.logoutMock();
-    setCurrentUser(null);
+  const handleAuthSuccess = (email: string) => {
+    mockBackend.loginMock(email);
+    setCurrentUser(email);
+    setShowAuthModal(false);
+
+    if (mockBackend.isSuperAdmin(email)) {
+        setView('superAdmin');
+        return;
+    }
+
+    if (authMode === 'save' && profile) {
+        // We were trying to save a draft. Now we associate it with the user.
+        const updatedProfile = { ...profile, email: email, isDraft: false };
+        const savedProfile = mockBackend.saveProfile(updatedProfile);
+        if (savedProfile) {
+            setProfile(savedProfile);
+            alert('האתר נשמר בהצלחה כטיוטה בחשבונך.');
+        }
+    } else if (authMode === 'login') {
+        // If we are currently viewing a profile, and I log in as the owner, 
+        // I want to stay on this profile but gain Admin rights.
+        if (profile && profile.email === email) {
+            // Force refresh of isAdmin calculation
+            setCurrentUser(email);
+            // We are already on the correct profile, just stay there.
+        } else {
+            // Just logged in generally. Try to load their personal profile if exists
+            const allProfiles = mockBackend.getProfiles();
+            const userProfile = allProfiles.find(p => p.email === email);
+            if (userProfile) {
+                setProfile(userProfile);
+                setView('profile');
+            } else {
+                 // If the user doesn't have a profile and wasn't viewing one they own
+                 if (!profile) {
+                     const confirmCreate = window.confirm('לא נמצא אתר קיים למשתמש זה. האם ברצונך ליצור אתר חדש?');
+                     if (confirmCreate) {
+                         handleStartCreate();
+                     }
+                 }
+            }
+        }
+    }
   };
 
   const handleUpdateProfile = (updated: Partial<DeceasedProfile>) => {
     if (!profile) return;
     const newProfile = { ...profile, ...updated };
-    const success = mockBackend.saveProfile(newProfile);
-    if (success) {
+    
+    // If it's a temp draft and user hasn't logged in yet, just update local state
+    if (!currentUser) {
         setProfile(newProfile);
-    } else {
-        alert('שגיאה בשמירת הנתונים. ייתכן והתמונה גדולה מדי לאחסון המקומי.');
+        return;
     }
+
+    const savedProfile = mockBackend.saveProfile(newProfile);
+    if (savedProfile) {
+        setProfile(savedProfile); // Use the returned profile to get auto-generated milestones
+    } else {
+        alert('שגיאה בשמירת הנתונים. ייתכן והקובץ גדול מדי.');
+    }
+  };
+
+  // Wrapper to prompt auth if saving for the first time
+  const handleSaveRequest = () => {
+      if (!currentUser) {
+          setAuthMode('save');
+          setShowAuthModal(true);
+      } else {
+          handleUpdateProfile({}); // Trigger save with current state
+          alert('כל השינויים נשמרו בהצלחה.');
+      }
+  };
+
+  const handlePaymentSuccess = () => {
+      if (!profile) return;
+      const updatedProfile = { ...profile, isPublic: true };
+      const saved = mockBackend.saveProfile(updatedProfile);
+      if (saved) setProfile(saved);
+      setShowPaymentModal(false);
+      alert('תודה רבה! האתר פורסם בהצלחה וכעת הוא זמין לכולם.');
   };
 
   const handleAddMemory = (memoryData: Omit<Memory, 'id' | 'createdAt'>) => {
@@ -72,16 +153,14 @@ const App: React.FC = () => {
 
     const updatedProfile = {
       ...profile,
-      memories: [...profile.memories, newMemory]
+      memories: [...(profile.memories || []), newMemory]
     };
-
-    const success = mockBackend.saveProfile(updatedProfile);
-    if (success) {
-        setProfile(updatedProfile);
-        setShowMemoryForm(false);
-    } else {
-        alert('שגיאה בשמירת הזיכרון. ייתכן והקובץ המצורף גדול מדי.');
+    
+    setProfile(updatedProfile);
+    if (currentUser) {
+        mockBackend.saveProfile(updatedProfile);
     }
+    setShowMemoryForm(false);
   };
 
   const handleEditMemory = (memoryData: Omit<Memory, 'id' | 'createdAt'>) => {
@@ -92,13 +171,11 @@ const App: React.FC = () => {
     );
 
     const updatedProfile = { ...profile, memories: updatedMemories };
-    const success = mockBackend.saveProfile(updatedProfile);
-    if (success) {
-        setProfile(updatedProfile);
-        setEditingMemory(null);
-    } else {
-        alert('שגיאה בשמירת השינויים.');
+    setProfile(updatedProfile);
+    if (currentUser) {
+        mockBackend.saveProfile(updatedProfile);
     }
+    setEditingMemory(null);
   };
 
   const handleDeleteMemory = (id: string) => {
@@ -110,44 +187,143 @@ const App: React.FC = () => {
       memories: profile.memories.filter(m => m.id !== id)
     };
     
-    const success = mockBackend.saveProfile(updatedProfile);
-    if (success) {
-        setProfile(updatedProfile);
+    setProfile(updatedProfile);
+    if (currentUser) {
+        mockBackend.saveProfile(updatedProfile);
     }
   };
 
-  if (!profile) return <div className="flex h-screen items-center justify-center">טוען...</div>;
+  // ---------------- RENDER ----------------
 
-  const isAdmin = currentUser === profile.email;
+  if (view === 'superAdmin') {
+      return (
+          <SuperAdminDashboard 
+            onLogout={() => {
+                mockBackend.logoutMock();
+                setCurrentUser(null);
+                setView('landing');
+            }}
+          />
+      );
+  }
+
+  if (view === 'landing') {
+      return (
+          <Landing 
+            profiles={mockBackend.getProfiles().filter(p => p.isPublic)} 
+            onCreate={handleStartCreate}
+            onSelectProfile={handleSelectProfile}
+            onLogin={() => {
+                setAuthMode('login');
+                setShowAuthModal(true);
+            }}
+          />
+      );
+  }
+
+  if (!profile) return <div className="h-screen flex items-center justify-center bg-stone-900 text-amber-500">טוען נתונים...</div>;
+
+  // Admin logic: 
+  const isAdmin = (currentUser && currentUser === profile.email) || (profile.isDraft === true && !profile.email);
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans">
+    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans pb-20">
       
-      {/* Navbar / Header Controls */}
-      <nav className="fixed top-0 w-full z-40 bg-white/10 backdrop-blur-sm border-b border-white/10 px-4 py-3 flex justify-between items-center transition-all hover:bg-white/90 hover:shadow-md group">
-        <div className="text-xl font-bold font-serif-hebrew text-amber-600 opacity-80 group-hover:opacity-100">
-          נשמה
-        </div>
-        <div>
-          {currentUser ? (
+      {/* Navbar */}
+      <nav className="fixed top-0 w-full z-40 bg-white/10 backdrop-blur-md border-b border-white/10 px-4 py-3 flex justify-between items-center transition-all hover:bg-white/95 hover:shadow-md group">
+        <div className="flex items-center gap-4">
+             {/* Back to Home Button */}
              <button 
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-sm text-stone-600 hover:text-red-500 transition-colors"
-            >
-              <LogOut size={18} />
-              <span>התנתק (מנהל)</span>
-            </button>
+                onClick={() => setView('landing')} 
+                className="flex items-center gap-2 text-stone-600 hover:text-amber-600 transition-colors bg-white/50 px-3 py-1.5 rounded-full hover:bg-white"
+             >
+                <ArrowRight size={18} />
+                <span className="font-bold text-sm">חזרה לעץ החיים</span>
+             </button>
+
+             {/* Site Name (Hidden on small screens if back button is present) */}
+             <div className="hidden md:block text-xl font-bold font-serif-hebrew text-amber-600 opacity-80">
+                {profile.fullName}
+             </div>
+
+            {!profile.isPublic && (
+                <span className="bg-stone-200 text-stone-600 text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1">
+                    <Eye size={12}/> טיוטה
+                </span>
+            )}
+        </div>
+       
+        <div className="flex items-center gap-3">
+          {currentUser ? (
+             <div className="flex items-center gap-3">
+                 {/* Show user email briefly or icon */}
+                 <span className="text-xs text-stone-400 hidden md:inline">{currentUser}</span>
+                 <button 
+                  onClick={() => {
+                      mockBackend.logoutMock();
+                      setCurrentUser(null);
+                      setView('landing');
+                  }}
+                  className="flex items-center gap-2 text-sm text-stone-600 hover:text-red-500 transition-colors"
+                >
+                  <LogOut size={18} />
+                  <span className="hidden md:inline">התנתק</span>
+                </button>
+             </div>
           ) : (
-            <button 
-              onClick={() => setShowAuthModal(true)}
-              className="flex items-center gap-2 text-sm text-stone-600 hover:text-amber-600 transition-colors"
-            >
-              <LogIn size={18} />
-              <span>כניסת מנהל</span>
-            </button>
+             <div className="flex items-center gap-2">
+                 <button 
+                  onClick={() => {
+                      setAuthMode('login');
+                      setShowAuthModal(true);
+                  }}
+                  className="bg-stone-800 text-white text-xs md:text-sm px-3 py-2 rounded-lg hover:bg-black transition-colors flex items-center gap-2 shadow-lg"
+                >
+                  <Settings size={14} />
+                  <span>ניהול הנצחה</span>
+                </button>
+             </div>
+          )}
+
+          {!currentUser && (
+              <button 
+                onClick={handleSaveRequest}
+                className="bg-amber-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-amber-700 transition-colors"
+              >
+                  שמור טיוטה
+              </button>
           )}
         </div>
       </nav>
+
+      {/* Trial / Payment Banner */}
+      {isAdmin && !profile.isPublic && (
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-stone-900 text-white p-4 flex flex-col md:flex-row items-center justify-between gap-4 border-t-4 border-amber-500 shadow-2xl animate-in slide-in-from-bottom-full">
+              <div className="flex items-center gap-3">
+                  <div className="bg-amber-500 p-2 rounded-full text-stone-900">
+                      <ShieldAlert size={24} />
+                  </div>
+                  <div>
+                      <h3 className="font-bold text-lg">מצב טיוטה (פרטי)</h3>
+                      <p className="text-stone-400 text-sm">האתר אינו גלוי לציבור. כדי לשתף אותו עם המשפחה והחברים, יש להפעיל מנוי.</p>
+                  </div>
+              </div>
+              <button 
+                onClick={() => {
+                    if(!currentUser) {
+                        setAuthMode('save');
+                        setShowAuthModal(true);
+                    } else {
+                        setShowPaymentModal(true);
+                    }
+                }}
+                className="bg-amber-500 hover:bg-amber-400 text-stone-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
+              >
+                  <ShoppingCart size={20}/>
+                  רכוש מנוי והפץ (₪150/שנה)
+              </button>
+          </div>
+      )}
 
       {/* Hero Section */}
       <Hero 
@@ -165,7 +341,7 @@ const App: React.FC = () => {
         </div>
 
         <Timeline 
-          memories={profile.memories} 
+          memories={profile.memories || []} 
           isAdmin={isAdmin} 
           onDelete={handleDeleteMemory}
           onEdit={(m) => setEditingMemory(m)}
@@ -177,17 +353,16 @@ const App: React.FC = () => {
         <RelatedProfiles relatedPeople={profile.familyMembers} />
       )}
 
-      {/* Floating Action Button for adding memories */}
-      <button
-        onClick={() => setShowMemoryForm(true)}
-        className="fixed bottom-8 left-8 bg-amber-600 text-white p-4 rounded-full shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 z-30 flex items-center justify-center group"
-        title="הוסף זיכרון"
-      >
-        <Plus size={32} />
-        <span className="absolute left-full ml-2 bg-stone-800 text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-          הוסף זיכרון
-        </span>
-      </button>
+      {/* Floating Action Button for adding memories (Only if Admin or Public) */}
+      {(isAdmin || profile.isPublic) && (
+          <button
+            onClick={() => setShowMemoryForm(true)}
+            className="fixed bottom-24 md:bottom-8 left-8 bg-amber-600 text-white p-4 rounded-full shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 z-30 flex items-center justify-center group"
+            title="הוסף זיכרון"
+          >
+            <Plus size={32} />
+          </button>
+      )}
 
       {/* Modals */}
       {(showMemoryForm || editingMemory) && (
@@ -205,45 +380,25 @@ const App: React.FC = () => {
       {showStory && (
         <StoryViewer 
           profile={profile}
-          memories={[...profile.memories].sort((a,b) => a.year - b.year)} 
+          memories={[...(profile.memories || [])].sort((a,b) => a.year - b.year)} 
           onClose={() => setShowStory(false)} 
         />
       )}
 
       {showAuthModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full relative">
-            <button 
-              onClick={() => setShowAuthModal(false)}
-              className="absolute top-4 left-4 text-gray-400 hover:text-gray-600"
-            >
-              ✕
-            </button>
-            <h2 className="text-2xl font-bold mb-6 text-center text-amber-700">כניסת מנהל דף</h2>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">דואר אלקטרוני</label>
-                <input 
-                  type="email" 
-                  value={authEmail}
-                  onChange={(e) => setAuthEmail(e.target.value)}
-                  className="w-full border p-2 rounded focus:ring-amber-500 focus:border-amber-500"
-                  placeholder="admin@demo.com"
-                  required
-                />
-              </div>
-              <button 
-                type="submit" 
-                className="w-full bg-amber-600 text-white py-2 rounded hover:bg-amber-700 transition-colors"
-              >
-                התחבר
-              </button>
-            </form>
-            <p className="mt-4 text-xs text-center text-gray-500">
-              * לצורך ההדגמה השתמש בכתובת: admin@demo.com
-            </p>
-          </div>
-        </div>
+          <AuthModal 
+            isSavingDraft={authMode === 'save'}
+            onSuccess={handleAuthSuccess}
+            onCancel={() => setShowAuthModal(false)}
+          />
+      )}
+
+      {showPaymentModal && profile && (
+          <PaymentModal 
+            profileName={profile.fullName}
+            onSuccess={handlePaymentSuccess}
+            onCancel={() => setShowPaymentModal(false)}
+          />
       )}
 
     </div>

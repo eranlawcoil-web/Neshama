@@ -239,15 +239,19 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ memories, profile, onClose })
 
       {/* Controls */}
       <div className="absolute top-8 right-4 flex gap-3 z-40">
-           {showCopied && (
-               <span className="text-xs bg-black/60 px-2 py-1 rounded text-white animate-fade-in">הקישור הועתק</span>
+           {profile.isPublic && (
+             <>
+                {showCopied && (
+                    <span className="text-xs bg-black/60 px-2 py-1 rounded text-white animate-fade-in">הקישור הועתק</span>
+                )}
+                <button onClick={handleCopyLink} className="hover:text-amber-400 transition-colors p-1 bg-black/20 rounded-full backdrop-blur-sm" title="העתק קישור">
+                    {showCopied ? <Check size={20} className="text-green-400" /> : <Link size={20} />}
+                </button>
+                <button onClick={handleShare} className="hover:text-amber-400 transition-colors p-1 bg-black/20 rounded-full backdrop-blur-sm" title="שתף">
+                    <Share2 size={20} />
+                </button>
+             </>
            )}
-           <button onClick={handleCopyLink} className="hover:text-amber-400 transition-colors p-1 bg-black/20 rounded-full backdrop-blur-sm" title="העתק קישור">
-              {showCopied ? <Check size={20} className="text-green-400" /> : <Link size={20} />}
-           </button>
-           <button onClick={handleShare} className="hover:text-amber-400 transition-colors p-1 bg-black/20 rounded-full backdrop-blur-sm" title="שתף">
-              <Share2 size={20} />
-           </button>
            <button onClick={() => setIsPaused(!isPaused)} className="hover:text-amber-400 transition-colors p-1 bg-black/20 rounded-full backdrop-blur-sm">
               {isPaused ? <Play size={20} /> : <Pause size={20} />}
            </button>

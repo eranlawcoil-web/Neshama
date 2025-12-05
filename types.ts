@@ -1,4 +1,5 @@
 
+
 export type MediaType = 'image' | 'video' | 'audio' | null;
 
 export interface Memory {
@@ -10,6 +11,7 @@ export interface Memory {
   createdAt: number;
   mediaType?: MediaType;
   mediaUrl?: string; // URL or Base64
+  tags?: string[];
 }
 
 export interface RelatedPerson {
@@ -37,9 +39,14 @@ export interface DeceasedProfile {
   graveLocation?: string;
   wazeLink?: string;
   playlistUrl?: string;
-  email: string; // Used for "login" simulation
+  email: string; // The owner's email
   memories: Memory[];
   familyMembers: RelatedPerson[];
+  
+  // New fields for management
+  isPublic: boolean; // False = Draft/Private, True = Paid/Public
+  isDraft?: boolean; // True during initial creation before first save
+  subscriptionExpiry?: number;
 }
 
 export interface User {
