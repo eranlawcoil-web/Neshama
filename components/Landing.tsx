@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { DeceasedProfile } from '../types';
 import { ChevronRight, ChevronLeft, Plus, ArrowLeft, Share2, Check } from 'lucide-react';
@@ -6,13 +7,14 @@ import ProfileSearch from './ProfileSearch';
 
 interface LandingProps {
   profiles: DeceasedProfile[];
+  projectName: string;
   onCreate: () => void;
   onLogin: () => void;
   onSelectProfile: (id: string) => void;
   onShowPrivacy: () => void;
 }
 
-const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelectProfile, onShowPrivacy }) => {
+const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLogin, onSelectProfile, onShowPrivacy }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
@@ -55,7 +57,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelect
                className="text-2xl font-serif-hebrew font-bold text-amber-500 tracking-wide cursor-pointer hover:text-amber-400 transition-colors"
                onClick={() => window.location.reload()}
              >
-                אתר הנצחה
+                {projectName}
              </div>
              
              {/* Search Bar */}

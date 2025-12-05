@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { DeceasedProfile, Memory, SystemConfig } from './types';
 import * as mockBackend from './services/mockBackend';
@@ -13,6 +14,7 @@ import PaymentModal from './components/PaymentModal';
 import SuperAdminDashboard from './components/SuperAdminDashboard';
 import ProfileSearch from './components/ProfileSearch';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
+import QRCodeModal from './components/QRCodeModal';
 import { LogIn, LogOut, Plus, ShieldAlert, ShoppingCart, Eye, ArrowRight, Settings, Gift, CheckCircle, Flame } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -32,6 +34,7 @@ const App: React.FC = () => {
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
   const [showStory, setShowStory] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
 
   // Scroll & Sticky State
   const [isScrolled, setIsScrolled] = useState(false);
@@ -246,6 +249,8 @@ const App: React.FC = () => {
 
   // ---------------- RENDER ----------------
 
+  const projectName = systemConfig?.projectName || 'אתר הנצחה';
+
   if (view === 'superAdmin') {
       return (
           <>
@@ -267,7 +272,8 @@ const App: React.FC = () => {
           <>
             <Landing 
                 // Pass filtered/sorted community profiles
-                profiles={mockBackend.getCommunityProfiles()} 
+                profiles={mockBackend.getCommunityProfiles()}
+                projectName={projectName}
                 onCreate={handleStartCreate}
                 onSelectProfile={handleSelectProfile}
                 onLogin={() => {
@@ -315,7 +321,7 @@ const App: React.FC = () => {
                     className={`flex items-center gap-2 transition-colors px-4 py-2 rounded-full hover:bg-white shrink-0 ${isScrolled ? 'text-stone-600 bg-stone-100' : 'text-stone-600 bg-white/50'}`}
                 >
                     <ArrowRight size={20} />
-                    <span className="font-bold text-base hidden xl:inline">חזרה לאתר ההנצחה</span>
+                    <span className="font-bold text-base hidden xl:inline">חזרה ל{projectName}</span>
                 </button>
 
                 {/* Sticky Profile Info - Slides in when scrolled */}
@@ -387,7 +393,7 @@ const App: React.FC = () => {
                         className="bg-stone-800 text-white text-xs md:text-sm px-3 py-2 rounded-lg hover:bg-black transition-colors flex items-center gap-2 shadow-lg"
                     >
                         <Settings size={14} />
-                        <span>ניהול אתר הנצחה</span>
+                        <span>ניהול {projectName}</span>
                     </button>
                 </div>
             )}
@@ -458,12 +464,13 @@ const App: React.FC = () => {
         onPlayStory={() => setShowStory(true)}
         isCandleLit={isCandleLit}
         setIsCandleLit={setIsCandleLit}
+        onShowQR={() => setShowQRModal(true)}
       />
 
       {/* Main Content - Timeline */}
       <main className="pb-8 relative flex-grow">
         <div className="text-center mt-12 mb-8 px-4">
-           <h2 className="text-3xl font-serif-hebrew text-stone-800">אתר ההנצחה</h2>
+           <h2 className="text-3xl font-serif-hebrew text-stone-800">{projectName}</h2>
            <p className="text-stone-500 mt-2">מסע בזמן דרך רגעים, תמונות וזכרונות</p>
         </div>
 
@@ -541,6 +548,15 @@ const App: React.FC = () => {
       )}
 
       {showPrivacyModal && <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />}
+      
+      {showQRModal && profile && (
+        <QRCodeModal 
+            url={window.location.href}
+            name={profile.fullName}
+            projectName={projectName}
+            onClose={() => setShowQRModal(false)}
+        />
+      )}
     </div>
   );
 };

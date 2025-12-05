@@ -73,6 +73,7 @@ export interface VisitLog {
 
 export interface SystemConfig {
     superAdminEmails: string[];
+    projectName: string; // Dynamic project name
     pricing: {
         originalPrice: number; // e.g. 300 (Crossed out)
         currentPrice: number;  // e.g. 150 (Actual)

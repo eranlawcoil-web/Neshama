@@ -1,8 +1,9 @@
 
+
 import React, { useState, useEffect } from 'react';
 import * as mockBackend from '../services/mockBackend';
 import { DeceasedProfile, VisitLog, SystemConfig } from '../types';
-import { Plus, Users, LogOut, CheckCircle, ExternalLink, Search, Edit, X, Save, Lock, Unlock, CreditCard, Gift, Activity, Settings, DollarSign, Mail, Trash2 } from 'lucide-react';
+import { Plus, Users, LogOut, CheckCircle, ExternalLink, Search, Edit, X, Save, Lock, Unlock, CreditCard, Gift, Activity, Settings, DollarSign, Mail, Trash2, PenTool } from 'lucide-react';
 
 interface SuperAdminDashboardProps {
   onLogout: () => void;
@@ -249,6 +250,26 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout, onS
 
   const renderSettingsTab = () => (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in">
+          {/* General Settings */}
+          <div className="bg-stone-900 rounded-2xl border border-stone-800 p-6 md:col-span-2">
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                  <PenTool size={20} className="text-purple-500"/>
+                  הגדרות כלליות ומיתוג
+              </h3>
+              
+              <div>
+                  <label className="block text-xs font-bold text-stone-500 uppercase mb-2">שם המיזם / כותרת האתר</label>
+                  <input 
+                    type="text"
+                    value={config.projectName}
+                    onChange={(e) => setConfig({...config, projectName: e.target.value})}
+                    placeholder="למשל: אתר הנצחה"
+                    className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-white focus:border-amber-500 outline-none"
+                  />
+                  <p className="text-xs text-stone-500 mt-2">שם זה יופיע בכותרת העליונה, בדף הנחיתה ובקודי ה-QR.</p>
+              </div>
+          </div>
+
           {/* Pricing Management */}
           <div className="bg-stone-900 rounded-2xl border border-stone-800 p-6">
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -349,7 +370,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout, onS
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 pb-8 border-b border-stone-800 gap-4">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-serif-hebrew font-bold text-amber-500 mb-2">ניהול מערכת - אתר הנצחה</h1>
+                    <h1 className="text-3xl md:text-4xl font-serif-hebrew font-bold text-amber-500 mb-2">ניהול מערכת - {config.projectName}</h1>
                     <p className="text-stone-400">ברוך הבא לממשק הניהול הראשי</p>
                 </div>
                 <button 

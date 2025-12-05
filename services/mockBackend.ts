@@ -31,13 +31,29 @@ const cleanNameForSave = (name: string): string => {
 
 // --- Config Management ---
 export const getSystemConfig = (): SystemConfig => {
-    const raw = localStorage.getItem(STORAGE_CONFIG_KEY);
-    if (raw) {
-        return JSON.parse(raw);
+    try {
+        const raw = localStorage.getItem(STORAGE_CONFIG_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            // Ensure backwards compatibility with defaults
+            return {
+                superAdminEmails: parsed.superAdminEmails || [DEFAULT_SUPER_ADMIN],
+                projectName: parsed.projectName || 'אתר הנצחה',
+                pricing: {
+                    originalPrice: parsed.pricing?.originalPrice ?? 300,
+                    currentPrice: parsed.pricing?.currentPrice ?? 150,
+                    currency: parsed.pricing?.currency || '₪'
+                }
+            };
+        }
+    } catch (e) {
+        console.error("Error reading config", e);
     }
+    
     // Default Config
     return {
         superAdminEmails: [DEFAULT_SUPER_ADMIN],
+        projectName: 'אתר הנצחה',
         pricing: {
             originalPrice: 300,
             currentPrice: 150,

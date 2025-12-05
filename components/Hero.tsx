@@ -1,7 +1,8 @@
 
+
 import React, { useState } from 'react';
 import { DeceasedProfile, RelatedPerson } from '../types';
-import { Camera, Edit3, Wand2, Loader2, Info, Play, Music, Navigation, Save, Users, Plus, Trash2, Share2, Check, Flame, Calendar, MapPin, X, Map as MapIcon } from 'lucide-react';
+import { Camera, Edit3, Wand2, Loader2, Info, Play, Music, Navigation, Save, Users, Plus, Trash2, Share2, Check, Flame, Calendar, MapPin, X, Map as MapIcon, QrCode } from 'lucide-react';
 import { generateTribute } from '../services/geminiService';
 
 interface HeroProps {
@@ -11,9 +12,10 @@ interface HeroProps {
   onPlayStory: () => void;
   isCandleLit: boolean;
   setIsCandleLit: (lit: boolean) => void;
+  onShowQR?: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlayStory, isCandleLit, setIsCandleLit }) => {
+const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlayStory, isCandleLit, setIsCandleLit, onShowQR }) => {
   const [isEditingMode, setIsEditingMode] = useState(false);
   
   // Local state for editing form
@@ -564,6 +566,17 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
                 >
                   {showCopied ? <Check size={24} /> : <Share2 size={24} />}
                 </button>
+
+                {/* QR Code Button - Visible if handler exists */}
+                {onShowQR && (
+                    <button
+                        onClick={onShowQR}
+                        className="bg-white/10 hover:bg-white/20 text-stone-300 hover:text-amber-400 p-3 rounded-full backdrop-blur shadow-lg border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="קוד גישה (QR)"
+                    >
+                        <QrCode size={24} />
+                    </button>
+                )}
               </div>
             </div>
 
