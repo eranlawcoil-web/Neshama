@@ -9,9 +9,10 @@ interface LandingProps {
   onCreate: () => void;
   onLogin: () => void;
   onSelectProfile: (id: string) => void;
+  onShowPrivacy: () => void;
 }
 
-const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelectProfile }) => {
+const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelectProfile, onShowPrivacy }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
@@ -45,7 +46,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelect
   const currentProfile = displayProfiles.length > 0 ? displayProfiles[activeIndex] : null;
 
   return (
-    <div className="relative w-full h-screen bg-stone-950 overflow-hidden text-white font-sans">
+    <div className="relative w-full h-screen bg-stone-950 overflow-hidden text-white font-sans flex flex-col justify-between">
       
       {/* Navbar */}
       <nav className="absolute top-0 left-0 right-0 z-50 flex flex-col md:flex-row justify-between items-center p-6 md:px-12 gap-4">
@@ -91,7 +92,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelect
       </nav>
 
       {/* Main Carousel Area */}
-      <div className="w-full h-full relative">
+      <div className="w-full h-full relative flex-1">
         {displayProfiles.map((profile, index) => {
             let positionClass = 'opacity-0 scale-110 z-0'; // Default hidden
             if (index === activeIndex) positionClass = 'opacity-100 scale-100 z-20'; // Active
@@ -149,7 +150,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelect
 
         {/* Navigation Dots/Arrows */}
         {displayProfiles.length > 1 && (
-            <div className="absolute bottom-12 right-12 z-40 flex items-center gap-6">
+            <div className="absolute bottom-24 right-12 z-40 flex items-center gap-6">
                 <div className="text-sm font-mono text-stone-400">
                     <span className="text-white text-xl">{activeIndex + 1}</span> / {displayProfiles.length}
                 </div>
@@ -170,6 +171,16 @@ const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelect
             </div>
         )}
       </div>
+
+      {/* Footer */}
+      <footer className="absolute bottom-0 w-full z-50 p-4 border-t border-white/10 bg-black/40 backdrop-blur-sm text-center md:text-right md:px-12 flex justify-center md:justify-start">
+         <button 
+           onClick={onShowPrivacy}
+           className="text-xs text-stone-400 hover:text-white transition-colors border-b border-transparent hover:border-white/50 pb-0.5"
+         >
+           תנאי שימוש ומדיניות פרטיות
+         </button>
+      </footer>
     </div>
   );
 };

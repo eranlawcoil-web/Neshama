@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { DeceasedProfile, RelatedPerson } from '../types';
-import { Camera, Edit3, Wand2, Loader2, Info, Play, Music, Navigation, Save, Users, Plus, Trash2, Share2, Check, Flame, Calendar, MapPin, X } from 'lucide-react';
+import { Camera, Edit3, Wand2, Loader2, Info, Play, Music, Navigation, Save, Users, Plus, Trash2, Share2, Check, Flame, Calendar, MapPin, X, Map as MapIcon } from 'lucide-react';
 import { generateTribute } from '../services/geminiService';
 
 interface HeroProps {
@@ -168,6 +168,21 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
     return `${day}.${month}.${year}`;
   };
 
+  // Helper for map logic
+  const getMapData = () => {
+      const location = profile.graveLocation || '';
+      const encodedLoc = encodeURIComponent(location);
+      
+      return {
+          hasLocation: !!location,
+          embedUrl: `https://maps.google.com/maps?q=${encodedLoc}&t=&z=15&ie=UTF8&iwloc=&output=embed`,
+          googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodedLoc}`,
+          wazeUrl: profile.wazeLink || `https://waze.com/ul?q=${encodedLoc}&navigate=yes`
+      };
+  };
+
+  const mapData = getMapData();
+
   return (
     <div className="relative w-full bg-stone-900 text-white overflow-hidden pb-12 transition-all">
       {/* Background with Parallax effect */}
@@ -180,70 +195,148 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
         <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/60 to-black/40"></div>
       </div>
       
-      {/* Hyper-Realistic Candle Animation */}
+      {/* Realistic Candle Animation Styles */}
       <style>{`
-        @keyframes flicker-slow {
-            0% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.04, 0.95); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 0.9; }
+        .candle-container {
+            width: 80px;
+            height: 100px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
-        @keyframes flicker-fast {
-            0% { transform: scale(1) translate(0, 0); opacity: 0.8; }
-            25% { transform: scale(1.02, 1.05) translate(-1px, 1px); opacity: 0.9; }
-            50% { transform: scale(0.98, 0.95) translate(1px, -1px); opacity: 0.7; }
-            75% { transform: scale(1.02, 1.05) translate(-1px, 1px); opacity: 0.9; }
-            100% { transform: scale(1) translate(0, 0); opacity: 0.8; }
+        .candle-glass {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0.1) 100%);
+            border-left: 1px solid rgba(255,255,255,0.3);
+            border-right: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            overflow: hidden;
         }
-        @keyframes wind {
-            0% { transform: skewX(0deg); }
-            20% { transform: skewX(-2deg); }
-            40% { transform: skewX(2deg); }
-            60% { transform: skewX(-1deg); }
-            100% { transform: skewX(0deg); }
+        .candle-wax {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            right: 5px;
+            height: 40%;
+            background: #fdf6d3; /* Wax color */
+            border-radius: 2px;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1);
+        }
+        .candle-wick {
+            position: absolute;
+            bottom: 42%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 10px;
+            background: #333;
+        }
+        
+        /* The Flame */
+        .flame {
+            position: absolute;
+            bottom: 48%; /* Just above wick */
+            left: 50%;
+            width: 14px;
+            height: 35px;
+            border-radius: 50% 50% 20% 20%;
+            background: radial-gradient(white 80%, transparent 100%);
+            transform: translateX(-50%);
+            box-shadow: 
+                0 0 10px 2px rgba(255, 165, 0, 0.6), /* Orange glow */
+                0 0 20px 5px rgba(255, 215, 0, 0.4), /* Yellow glow */
+                0 -10px 20px 5px rgba(255, 69, 0, 0.3); /* Red top glow */
+            animation: flame-flicker 3s infinite linear, flame-move 2s infinite ease-in-out alternate;
+            opacity: 0.9;
+            transform-origin: bottom center;
+            z-index: 10;
+        }
+
+        /* Inner Blue Core */
+        .flame::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 10px;
+            background: rgba(0, 0, 255, 0.5);
+            border-radius: 50%;
+            filter: blur(2px);
+        }
+
+        /* Glass Reflection */
+        .glass-reflection {
+             position: absolute;
+             top: 10%;
+             left: 10%;
+             width: 5px;
+             height: 60%;
+             background: rgba(255,255,255,0.2);
+             border-radius: 10px;
+             filter: blur(1px);
+        }
+
+        /* Halo / Ambient Light */
+        .candle-glow {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(255,160,0,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: glow-pulse 3s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        /* Off State */
+        .candle-off .flame { display: none; }
+        .candle-off .candle-glow { display: none; }
+        
+        @keyframes flame-flicker {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
+            25% { transform: translateX(-50%) scale(0.95, 1.05); opacity: 0.8; }
+            50% { transform: translateX(-50%) scale(1.05, 0.95); opacity: 1; }
+            75% { transform: translateX(-50%) scale(0.98, 1.02); opacity: 0.85; }
+        }
+        
+        @keyframes flame-move {
+            0% { transform: translateX(-52%) rotate(-1deg); }
+            100% { transform: translateX(-48%) rotate(1deg); }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.5; transform: translateX(-50%) scale(0.9); }
         }
       `}</style>
 
-      {/* Memorial Candle */}
-      <div className="absolute top-24 left-4 z-20 md:top-32 md:left-12">
-        <div className="flex flex-col items-center gap-2">
-            <button 
-                onClick={() => setIsCandleLit(true)}
-                className={`relative group w-12 h-16 md:w-16 md:h-20 rounded-t-full border-b-8 shadow-2xl transition-all duration-1000 ${isCandleLit ? 'bg-amber-100/90 border-amber-800 shadow-[0_0_50px_rgba(251,146,60,0.5)]' : 'bg-stone-700/50 border-stone-800 hover:bg-stone-600'}`}
-                title={isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר זיכרון'}
-            >
-                {/* Flame Animation */}
-                {isCandleLit ? (
-                    <>
-                        {/* Outer Glow / Halo */}
-                        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 w-24 h-24 bg-orange-500/20 rounded-full blur-2xl animate-[flicker-slow_3s_infinite_ease-in-out]"></div>
-                        
-                        {/* Flame Container (Wind) */}
-                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 origin-bottom animate-[wind_2s_infinite_ease-in-out]">
-                             {/* Outer Flame (Orange) */}
-                            <div 
-                                className="w-5 h-10 bg-gradient-to-t from-orange-600 via-orange-400 to-yellow-200 rounded-full blur-[2px] shadow-[0_0_20px_rgba(255,165,0,0.8)] animate-[flicker-fast_0.1s_infinite_linear]"
-                            ></div>
-                            
-                            {/* Inner Core (White/Yellow) */}
-                            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-6 bg-white rounded-full blur-[1px] opacity-90 animate-[flicker-fast_0.2s_infinite_linear]"></div>
-
-                            {/* Blue Base */}
-                            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-blue-600/60 rounded-full blur-[2px]"></div>
-                        </div>
-                    </>
-                ) : (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-1 h-3 bg-stone-900 rounded-full"></div>
-                )}
-                
-                {/* Candle Body Icon */}
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
-                   <Flame size={isCandleLit ? 24 : 20} className={`transition-colors duration-700 ${isCandleLit ? 'text-amber-500 opacity-0' : 'text-stone-500'}`} />
-                </div>
-            </button>
-            <span className={`text-[10px] md:text-xs font-bold transition-opacity duration-700 text-center max-w-[100px] leading-tight ${isCandleLit ? 'text-amber-400 opacity-100' : 'text-stone-500 opacity-100'}`}>
-                {isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר לעילוי הנשמה'}
-            </span>
+      {/* Candle Placement */}
+      <div className="absolute top-24 left-4 z-20 md:top-32 md:left-12 flex flex-col items-center">
+        <div 
+            className={`candle-container ${isCandleLit ? '' : 'candle-off'} hover:scale-105`}
+            onClick={() => setIsCandleLit(true)}
+            title={isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר זיכרון'}
+        >
+             <div className="candle-glow"></div>
+             <div className="candle-glass bg-stone-800/30 backdrop-blur-sm border-stone-600/50">
+                <div className="glass-reflection"></div>
+                <div className="candle-wax bg-stone-100"></div>
+                <div className="candle-wick"></div>
+                <div className="flame"></div>
+             </div>
         </div>
+        
+        <span className={`mt-2 text-[10px] md:text-xs font-bold transition-all duration-700 text-center max-w-[100px] leading-tight px-2 py-1 rounded-full ${isCandleLit ? 'text-amber-300 bg-black/40' : 'text-stone-400 bg-black/20'}`}>
+             {isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר לעילוי הנשמה'}
+        </span>
       </div>
 
       <div className="relative z-10 container mx-auto px-4 pt-24 flex flex-col items-center text-center">
@@ -282,7 +375,7 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
 
              <div className="space-y-4 mb-6">
                 <div>
-                  <label className="text-xs text-stone-400 block mb-1">שם מלא</label>
+                  <label className="text-xs text-stone-400 block mb-1">שם המונצח</label>
                   <input 
                       value={editForm.fullName} 
                       onChange={e => setEditForm({...editForm, fullName: e.target.value})}
@@ -534,18 +627,22 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
       {/* Info Modal */}
       {showInfoModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
-              <div className="bg-white text-stone-900 rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-100 transition-all border border-stone-200">
-                  <button onClick={() => setShowInfoModal(false)} className="absolute top-4 left-4 p-2 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-900 transition-colors">
-                      <X size={24} />
-                  </button>
+              <div className="bg-white text-stone-900 rounded-3xl max-w-2xl w-full p-0 relative shadow-2xl transform scale-100 transition-all border border-stone-200 overflow-hidden flex flex-col max-h-[90vh]">
                   
-                  <h3 className="text-3xl font-serif-hebrew font-bold mb-8 text-center text-stone-800">
-                      פרטים ודרכי הגעה
-                  </h3>
+                  {/* Modal Header */}
+                  <div className="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+                      <h3 className="text-2xl font-serif-hebrew font-bold text-stone-800 flex items-center gap-2">
+                          <MapIcon className="text-amber-600" size={24} />
+                          פרטים ודרכי הגעה
+                      </h3>
+                      <button onClick={() => setShowInfoModal(false)} className="p-2 rounded-full hover:bg-stone-200 text-stone-400 hover:text-stone-900 transition-colors">
+                          <X size={24} />
+                      </button>
+                  </div>
 
-                  {isAdmin ? (
-                    <div className="space-y-5">
-                        <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100">
+                  <div className="overflow-y-auto p-6 space-y-6">
+                      {isAdmin ? (
+                        <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100 mb-4">
                             <h4 className="text-amber-800 font-bold mb-4 flex items-center gap-2 text-lg"><Edit3 size={18}/> עריכת מידע נוסף</h4>
                             <div className="space-y-4">
                               <div>
@@ -553,56 +650,91 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
                                   <input value={extraInfo.hebrewDeathDate} onChange={e => setExtraInfo({...extraInfo, hebrewDeathDate: e.target.value})} className="w-full border-b border-amber-200 bg-transparent py-2 focus:border-amber-600 outline-none transition-colors" placeholder="למשל: י״ד באייר התשפ״ג" />
                               </div>
                               <div>
-                                  <label className="text-xs font-bold text-stone-500 uppercase tracking-wide">מיקום הקבר</label>
+                                  <label className="text-xs font-bold text-stone-500 uppercase tracking-wide">מיקום הקבר / כתובת</label>
                                   <input value={extraInfo.graveLocation} onChange={e => setExtraInfo({...extraInfo, graveLocation: e.target.value})} className="w-full border-b border-amber-200 bg-transparent py-2 focus:border-amber-600 outline-none transition-colors" placeholder="שם בית עלמין, חלקה, שורה..." />
                               </div>
                               <div>
-                                  <label className="text-xs font-bold text-stone-500 uppercase tracking-wide">לינק ל-Waze</label>
+                                  <label className="text-xs font-bold text-stone-500 uppercase tracking-wide">לינק ל-Waze (אופציונלי)</label>
                                   <input value={extraInfo.wazeLink} onChange={e => setExtraInfo({...extraInfo, wazeLink: e.target.value})} className="w-full border-b border-amber-200 bg-transparent py-2 focus:border-amber-600 outline-none text-left transition-colors" dir="ltr" placeholder="https://waze.com/..." />
                               </div>
                               <div>
                                   <label className="text-xs font-bold text-stone-500 uppercase tracking-wide">לינק לפלייליסט</label>
                                   <input value={extraInfo.playlistUrl} onChange={e => setExtraInfo({...extraInfo, playlistUrl: e.target.value})} className="w-full border-b border-amber-200 bg-transparent py-2 focus:border-amber-600 outline-none text-left transition-colors" dir="ltr" placeholder="https://youtube.com/..." />
                               </div>
+                              <button onClick={saveExtraInfo} className="w-full bg-stone-900 text-white py-3 rounded-xl font-bold hover:bg-black transition-colors shadow-lg mt-4">שמור פרטים</button>
                             </div>
                         </div>
-                        <button onClick={saveExtraInfo} className="w-full bg-stone-900 text-white py-3 rounded-xl font-bold hover:bg-black transition-colors shadow-lg">שמור פרטים</button>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-5 p-4 bg-stone-50 rounded-2xl border border-stone-100">
-                            <div className="bg-white p-3 rounded-full shadow-sm text-amber-600 ring-1 ring-amber-100">
-                               <Calendar size={24} />
+                      ) : (
+                        <div className="space-y-6">
+                            {/* Date Card */}
+                            <div className="flex flex-col md:flex-row gap-4">
+                                <div className="flex-1 bg-stone-50 p-5 rounded-2xl border border-stone-100 flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-amber-600 shadow-sm border border-stone-100">
+                                        <Calendar size={24} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">תאריך פטירה</div>
+                                        <div className="font-bold text-xl text-stone-800 font-mono">{formatDate(profile.deathDate) || profile.deathYear}</div>
+                                        <div className="font-serif-hebrew text-stone-600">{profile.hebrewDeathDate}</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">תאריך פטירה</p>
-                                <p className="text-xl font-bold text-stone-800">
-                                    {formatDate(profile.deathDate) || profile.deathYear}
-                                </p>
-                                <p className="text-lg font-serif-hebrew text-stone-600">
-                                    {profile.hebrewDeathDate || 'לא צוין'}
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-5 p-4 bg-stone-50 rounded-2xl border border-stone-100">
-                             <div className="bg-white p-3 rounded-full shadow-sm text-amber-600 ring-1 ring-amber-100">
-                               <MapPin size={24} />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">מיקום הקבר</p>
-                                <p className="text-lg font-medium text-stone-800 leading-tight">{profile.graveLocation || 'לא צוין'}</p>
-                            </div>
-                        </div>
 
-                        {profile.wazeLink && (
-                            <a href={profile.wazeLink} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-3 w-full bg-[#33ccff] hover:bg-[#2cb5e3] text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 transition-all hover:-translate-y-1 mt-4">
-                                <Navigation size={24} />
-                                <span className="text-lg">נווט עם Waze</span>
-                            </a>
-                        )}
-                    </div>
-                  )}
+                            {/* Location Section */}
+                            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                                <div className="p-5 border-b border-stone-100 flex items-start gap-4">
+                                     <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+                                        <MapPin size={24} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">מיקום הקבר / הנצחה</div>
+                                        <div className="text-lg font-medium text-stone-800 leading-snug">
+                                            {profile.graveLocation || 'לא צוין מיקום'}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {mapData.hasLocation && (
+                                    <div className="w-full h-48 bg-stone-100 relative">
+                                        <iframe 
+                                            width="100%" 
+                                            height="100%" 
+                                            frameBorder="0" 
+                                            scrolling="no" 
+                                            marginHeight={0} 
+                                            marginWidth={0} 
+                                            src={mapData.embedUrl}
+                                            className="opacity-90 hover:opacity-100 transition-opacity"
+                                            title="Map Location"
+                                        ></iframe>
+                                        <div className="absolute inset-0 pointer-events-none border-inner shadow-inner"></div>
+                                    </div>
+                                )}
+                                
+                                {mapData.hasLocation && (
+                                    <div className="p-4 bg-stone-50 flex gap-3">
+                                        <a 
+                                            href={mapData.wazeUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="flex-1 flex items-center justify-center gap-2 bg-[#33ccff] hover:bg-[#2cb5e3] text-white py-3 rounded-xl font-bold shadow transition-transform hover:-translate-y-1"
+                                        >
+                                            <Navigation size={18} /> ניווט ב-Waze
+                                        </a>
+                                        <a 
+                                            href={mapData.googleMapsUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-stone-100 text-stone-700 border border-stone-300 py-3 rounded-xl font-bold transition-colors"
+                                        >
+                                            <MapIcon size={18} /> Google Maps
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                      )}
+                  </div>
               </div>
           </div>
       )}

@@ -12,6 +12,7 @@ import AuthModal from './components/AuthModal';
 import PaymentModal from './components/PaymentModal';
 import SuperAdminDashboard from './components/SuperAdminDashboard';
 import ProfileSearch from './components/ProfileSearch';
+import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 import { LogIn, LogOut, Plus, ShieldAlert, ShoppingCart, Eye, ArrowRight, Settings, Gift, CheckCircle, Flame } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -30,6 +31,7 @@ const App: React.FC = () => {
   const [showMemoryForm, setShowMemoryForm] = useState(false);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
   const [showStory, setShowStory] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   // Scroll & Sticky State
   const [isScrolled, setIsScrolled] = useState(false);
@@ -246,13 +248,17 @@ const App: React.FC = () => {
 
   if (view === 'superAdmin') {
       return (
-          <SuperAdminDashboard 
-            onLogout={() => {
-                mockBackend.logoutMock();
-                setCurrentUser(null);
-                setView('landing');
-            }}
-          />
+          <>
+            <SuperAdminDashboard 
+                onLogout={() => {
+                    mockBackend.logoutMock();
+                    setCurrentUser(null);
+                    setView('landing');
+                }}
+                onShowPrivacy={() => setShowPrivacyModal(true)}
+            />
+            {showPrivacyModal && <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />}
+          </>
       );
   }
 
@@ -268,6 +274,7 @@ const App: React.FC = () => {
                     setAuthMode('login');
                     setShowAuthModal(true);
                 }}
+                onShowPrivacy={() => setShowPrivacyModal(true)}
             />
             {showAuthModal && (
                 <AuthModal 
@@ -276,6 +283,7 @@ const App: React.FC = () => {
                     onCancel={() => setShowAuthModal(false)}
                 />
             )}
+            {showPrivacyModal && <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />}
           </>
       );
   }
@@ -288,7 +296,7 @@ const App: React.FC = () => {
   const originalPrice = systemConfig?.pricing.originalPrice || 300;
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans pb-20">
+    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans flex flex-col">
       
       {/* Navbar - Sticky & Dynamic */}
       <nav 
@@ -453,7 +461,7 @@ const App: React.FC = () => {
       />
 
       {/* Main Content - Timeline */}
-      <main className="pb-8 relative">
+      <main className="pb-8 relative flex-grow">
         <div className="text-center mt-12 mb-8 px-4">
            <h2 className="text-3xl font-serif-hebrew text-stone-800">אתר ההנצחה</h2>
            <p className="text-stone-500 mt-2">מסע בזמן דרך רגעים, תמונות וזכרונות</p>
@@ -468,10 +476,20 @@ const App: React.FC = () => {
         />
       </main>
 
-      {/* Footer / Related Profiles */}
+      {/* Related Profiles */}
       {profile.familyMembers && profile.familyMembers.length > 0 && (
         <RelatedProfiles relatedPeople={profile.familyMembers} />
       )}
+      
+      {/* App Footer */}
+      <footer className="bg-stone-900 text-stone-400 py-6 text-center text-sm border-t border-stone-800 mt-auto">
+          <button 
+             onClick={() => setShowPrivacyModal(true)}
+             className="hover:text-white transition-colors underline decoration-stone-700 hover:decoration-white"
+          >
+             תנאי שימוש ומדיניות פרטיות
+          </button>
+      </footer>
 
       {(isAdmin || profile.isPublic) && (
           <button
@@ -522,6 +540,7 @@ const App: React.FC = () => {
           />
       )}
 
+      {showPrivacyModal && <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />}
     </div>
   );
 };

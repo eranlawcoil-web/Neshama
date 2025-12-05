@@ -6,11 +6,12 @@ import { Plus, Users, LogOut, CheckCircle, ExternalLink, Search, Edit, X, Save, 
 
 interface SuperAdminDashboardProps {
   onLogout: () => void;
+  onShowPrivacy?: () => void;
 }
 
 type Tab = 'sites' | 'activity' | 'settings';
 
-const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) => {
+const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout, onShowPrivacy }) => {
   const [activeTab, setActiveTab] = useState<Tab>('sites');
   
   const [profiles, setProfiles] = useState<DeceasedProfile[]>([]);
@@ -130,7 +131,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                 <table className="w-full text-right">
                     <thead className="bg-stone-950 text-stone-500 text-sm">
                         <tr>
-                            <th className="p-4 font-medium">שם הנפטר</th>
+                            <th className="p-4 font-medium">שם המונצח</th>
                             <th className="p-4 font-medium">בעל האתר</th>
                             <th className="p-4 font-medium">סטטוס</th>
                             <th className="p-4 font-medium">סוג חשבון</th>
@@ -343,8 +344,8 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
   );
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-200 p-4 md:p-8 font-sans">
-        <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-stone-950 text-stone-200 p-4 md:p-8 font-sans flex flex-col">
+        <div className="max-w-7xl mx-auto w-full flex-grow">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 pb-8 border-b border-stone-800 gap-4">
                 <div>
@@ -470,6 +471,16 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                 </div>
             )}
         </div>
+
+        {/* Footer */}
+        <footer className="mt-auto py-6 text-center text-sm border-t border-stone-800">
+            <button 
+                onClick={onShowPrivacy}
+                className="text-stone-500 hover:text-white transition-colors underline decoration-stone-700 hover:decoration-white"
+            >
+                תנאי שימוש ומדיניות פרטיות
+            </button>
+        </footer>
     </div>
   );
 };
