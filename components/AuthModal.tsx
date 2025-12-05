@@ -1,7 +1,7 @@
 
 
-import React, { useState } from 'react';
-import { Mail, ArrowRight, Loader2, Check, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, ArrowRight, Loader2, Check, X, RefreshCw } from 'lucide-react';
 import { verifyCode, sendVerificationCode } from '../services/mockBackend';
 
 interface AuthModalProps {
@@ -17,11 +17,25 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
+  // Resend Timer State
+  const [resendTimer, setResendTimer] = useState(0);
+
   // State for simulated notification
   const [simulatedNotification, setSimulatedNotification] = useState<{code: string, show: boolean}>({ code: '', show: false });
 
-  const handleSendCode = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Handle countdown
+  useEffect(() => {
+      let interval: any;
+      if (resendTimer > 0) {
+          interval = setInterval(() => {
+              setResendTimer(prev => prev - 1);
+          }, 1000);
+      }
+      return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  const handleSendCode = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!email.includes('@')) {
         setError('נא להזין כתובת אימייל תקינה');
         return;
@@ -33,6 +47,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
         setLoading(false);
         const generatedCode = sendVerificationCode(email);
         setStep('code');
+        setResendTimer(60); // Start 60s cooldown
         
         // Show simulated notification instead of alert
         setSimulatedNotification({ code: generatedCode, show: true });
@@ -133,9 +148,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
         ) : (
             <form onSubmit={handleVerify} className="space-y-4 animate-in slide-in-from-right duration-300">
                  <div className="text-center mb-4">
-                    <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-900 px-4 py-1.5 rounded-full text-xs font-bold border border-amber-100">
-                        <Mail size={12}/>
-                        נשלח קוד אל {email}
+                    <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-900 px-4 py-2 rounded-lg text-sm font-medium border border-amber-100">
+                        <Mail size={16}/>
+                        <span>קוד נשלח לכתובת: <span className="font-bold dir-ltr">{email}</span></span>
                     </div>
                  </div>
                  
@@ -173,12 +188,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
                     {loading ? <Loader2 className="animate-spin" /> : <>אמת והכנס <Check size={18}/></>}
                 </button>
                 
-                <div className="flex justify-between items-center mt-4 px-2">
+                <div className="flex justify-between items-center mt-4 px-2 pt-2 border-t border-stone-100">
                     <button type="button" onClick={() => setStep('email')} className="text-stone-400 text-xs hover:text-stone-600 transition-colors">
                         החלף כתובת מייל
                     </button>
-                    <button type="button" onClick={handleSendCode} className="text-amber-600 text-xs hover:text-amber-700 font-bold transition-colors">
-                        שלח קוד שוב
+                    
+                    <button 
+                        type="button" 
+                        onClick={() => handleSendCode()} 
+                        disabled={resendTimer > 0}
+                        className={`text-xs font-bold transition-colors flex items-center gap-1 ${resendTimer > 0 ? 'text-stone-300 cursor-not-allowed' : 'text-amber-600 hover:text-amber-700'}`}
+                    >
+                        {resendTimer > 0 ? (
+                            <span>שלח שוב בעוד {resendTimer} שניות</span>
+                        ) : (
+                            <>
+                                <RefreshCw size={12} /> שלח קוד שוב
+                            </>
+                        )}
                     </button>
                 </div>
             </form>

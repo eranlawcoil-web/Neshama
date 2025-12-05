@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { DeceasedProfile, RelatedPerson } from '../types';
 import { Camera, Edit3, Wand2, Loader2, Info, Play, Music, Navigation, Save, Users, Plus, Trash2, Share2, Check, Flame, Calendar, MapPin, X } from 'lucide-react';
@@ -181,15 +180,26 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
         <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/60 to-black/40"></div>
       </div>
       
-      {/* Custom Flicker Animation Style */}
+      {/* Hyper-Realistic Candle Animation */}
       <style>{`
-        @keyframes flame-flicker {
-            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
-            10% { transform: translateX(-51%) scale(1.02); opacity: 0.8; }
-            20% { transform: translateX(-49%) scale(1.05); opacity: 1; }
-            40% { transform: translateX(-50%) scale(0.98); opacity: 0.85; }
-            60% { transform: translateX(-52%) scale(1.03); opacity: 1; }
-            80% { transform: translateX(-48%) scale(0.95); opacity: 0.9; }
+        @keyframes flicker-slow {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.04, 0.95); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+        @keyframes flicker-fast {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.8; }
+            25% { transform: scale(1.02, 1.05) translate(-1px, 1px); opacity: 0.9; }
+            50% { transform: scale(0.98, 0.95) translate(1px, -1px); opacity: 0.7; }
+            75% { transform: scale(1.02, 1.05) translate(-1px, 1px); opacity: 0.9; }
+            100% { transform: scale(1) translate(0, 0); opacity: 0.8; }
+        }
+        @keyframes wind {
+            0% { transform: skewX(0deg); }
+            20% { transform: skewX(-2deg); }
+            40% { transform: skewX(2deg); }
+            60% { transform: skewX(-1deg); }
+            100% { transform: skewX(0deg); }
         }
       `}</style>
 
@@ -198,30 +208,36 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
         <div className="flex flex-col items-center gap-2">
             <button 
                 onClick={() => setIsCandleLit(true)}
-                className={`relative group w-12 h-16 md:w-16 md:h-20 rounded-t-full border-b-8 shadow-2xl transition-all duration-1000 ${isCandleLit ? 'bg-amber-100/90 border-amber-800 shadow-[0_0_40px_rgba(251,191,36,0.6)]' : 'bg-stone-700/50 border-stone-800 hover:bg-stone-600'}`}
+                className={`relative group w-12 h-16 md:w-16 md:h-20 rounded-t-full border-b-8 shadow-2xl transition-all duration-1000 ${isCandleLit ? 'bg-amber-100/90 border-amber-800 shadow-[0_0_50px_rgba(251,146,60,0.5)]' : 'bg-stone-700/50 border-stone-800 hover:bg-stone-600'}`}
                 title={isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר זיכרון'}
             >
                 {/* Flame Animation */}
                 {isCandleLit ? (
                     <>
-                        {/* Outer Glow */}
-                        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-orange-500/30 rounded-full blur-xl animate-pulse"></div>
-                        {/* Core Flame */}
-                        <div 
-                            className="absolute -top-6 left-1/2 w-4 h-8 bg-gradient-to-t from-orange-600 via-orange-400 to-yellow-100 rounded-full blur-[1px] origin-bottom shadow-lg shadow-orange-500/50"
-                            style={{ animation: 'flame-flicker 2s infinite linear' }}
-                        >
-                            {/* Inner Blue Base */}
-                            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1.5 h-2.5 bg-blue-500/40 rounded-full blur-[1px]"></div>
+                        {/* Outer Glow / Halo */}
+                        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 w-24 h-24 bg-orange-500/20 rounded-full blur-2xl animate-[flicker-slow_3s_infinite_ease-in-out]"></div>
+                        
+                        {/* Flame Container (Wind) */}
+                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 origin-bottom animate-[wind_2s_infinite_ease-in-out]">
+                             {/* Outer Flame (Orange) */}
+                            <div 
+                                className="w-5 h-10 bg-gradient-to-t from-orange-600 via-orange-400 to-yellow-200 rounded-full blur-[2px] shadow-[0_0_20px_rgba(255,165,0,0.8)] animate-[flicker-fast_0.1s_infinite_linear]"
+                            ></div>
+                            
+                            {/* Inner Core (White/Yellow) */}
+                            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-6 bg-white rounded-full blur-[1px] opacity-90 animate-[flicker-fast_0.2s_infinite_linear]"></div>
+
+                            {/* Blue Base */}
+                            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-blue-600/60 rounded-full blur-[2px]"></div>
                         </div>
                     </>
                 ) : (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-1 h-3 bg-stone-900 rounded-full"></div>
                 )}
                 
-                {/* Candle Body */}
+                {/* Candle Body Icon */}
                 <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
-                   <Flame size={isCandleLit ? 24 : 20} className={`transition-colors duration-700 ${isCandleLit ? 'text-amber-500 opacity-50' : 'text-stone-500'}`} />
+                   <Flame size={isCandleLit ? 24 : 20} className={`transition-colors duration-700 ${isCandleLit ? 'text-amber-500 opacity-0' : 'text-stone-500'}`} />
                 </div>
             </button>
             <span className={`text-[10px] md:text-xs font-bold transition-opacity duration-700 text-center max-w-[100px] leading-tight ${isCandleLit ? 'text-amber-400 opacity-100' : 'text-stone-500 opacity-100'}`}>

@@ -1,7 +1,8 @@
 
+
 import React from 'react';
 import { RelatedPerson } from '../types';
-import { ExternalLink, Heart } from 'lucide-react';
+import { ExternalLink, Heart, Eye } from 'lucide-react';
 
 interface RelatedProfilesProps {
   relatedPeople: RelatedPerson[];
@@ -37,54 +38,61 @@ const RelatedProfiles: React.FC<RelatedProfilesProps> = ({ relatedPeople }) => {
           {relatedPeople.map((person) => (
             <div 
               key={person.id} 
-              className="group bg-stone-800/40 rounded-2xl overflow-hidden border border-stone-700/50 hover:border-amber-700/50 transition-all duration-500 hover:shadow-2xl hover:shadow-amber-900/10 hover:-translate-y-1"
+              className="group relative bg-stone-800 rounded-2xl overflow-hidden border border-stone-700/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 h-96"
             >
-              {/* Card Header / Image */}
-              <div className="relative h-64 overflow-hidden">
-                <div className="absolute inset-0 bg-stone-900/10 z-10 transition-opacity group-hover:opacity-0"></div>
-                <img 
-                  src={person.imageUrl || 'https://via.placeholder.com/400'} 
-                  alt={person.name} 
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 filter grayscale-[20%] group-hover:grayscale-0"
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-stone-900 via-stone-900/80 to-transparent z-20 flex flex-col justify-end h-full">
-                  <div className="translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                      <span className="inline-block text-amber-300 font-bold text-xs tracking-wider uppercase bg-amber-900/40 px-3 py-1 rounded-full backdrop-blur-md border border-amber-500/20 mb-2">
-                        {person.relation}
-                      </span>
-                      <h3 className="text-3xl font-serif-hebrew font-bold text-white mb-1 shadow-black drop-shadow-md">
-                        {person.name}
-                      </h3>
-                      <div className="text-sm font-mono text-stone-300 dir-ltr text-right opacity-90">
-                        {(formatDate(person.birthDate) || '')} - {(formatDate(person.deathDate) || '')}
-                      </div>
-                  </div>
-                </div>
+              {/* Image & Overlay */}
+              <div className="absolute inset-0 z-0">
+                  <img 
+                    src={person.imageUrl || 'https://via.placeholder.com/400'} 
+                    alt={person.name} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 group-hover:grayscale-0 grayscale-[30%]"
+                  />
+                  {/* Gradient Overlay: Darkens on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-colors duration-500 group-hover:from-black/95 group-hover:via-black/60"></div>
               </div>
 
-              {/* Card Content */}
-              <div className="p-6 relative">
-                {person.shortDescription && (
-                  <p className="text-stone-400 text-sm leading-relaxed mb-6 line-clamp-3 min-h-[4.5em] font-light">
-                    {person.shortDescription}
-                  </p>
-                )}
+              {/* Content Content */}
+              <div className="absolute inset-0 z-10 p-6 flex flex-col justify-end">
+                  
+                  <div className="transform transition-transform duration-500 translate-y-4 group-hover:translate-y-0">
+                      <div className="flex justify-between items-end mb-2">
+                           <span className="inline-block text-amber-400 font-bold text-xs tracking-wider uppercase bg-black/40 px-3 py-1 rounded-full backdrop-blur-md border border-amber-500/30">
+                              {person.relation}
+                           </span>
+                           <span className="text-xs font-mono text-stone-300 opacity-80 dir-ltr">
+                                {(formatDate(person.birthDate) || '')} - {(formatDate(person.deathDate) || '')}
+                           </span>
+                      </div>
 
-                {person.memorialUrl && person.memorialUrl !== '#' ? (
-                  <a 
-                    href={person.memorialUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-3 bg-stone-700/50 hover:bg-amber-700 text-stone-300 hover:text-white rounded-xl transition-all duration-300 font-medium text-sm border border-stone-600 hover:border-amber-600 group/btn"
-                  >
-                    <span>ביקור באתר ההנצחה</span>
-                    <ExternalLink size={14} className="group-hover/btn:translate-x-[-2px] transition-transform" />
-                  </a>
-                ) : (
-                  <div className="w-full py-3 bg-stone-800/30 text-stone-600 rounded-xl text-center text-sm cursor-default border border-stone-800/50 flex items-center justify-center gap-2">
-                    <span>טרם הוקם אתר</span>
+                      <h3 className="text-3xl font-serif-hebrew font-bold text-white mb-2 drop-shadow-md">
+                        {person.name}
+                      </h3>
+
+                      {person.shortDescription && (
+                        <p className="text-stone-300 text-sm leading-relaxed mb-4 line-clamp-2 opacity-90 font-light">
+                            {person.shortDescription}
+                        </p>
+                      )}
+
+                      {/* Action Button - Reveals on hover */}
+                      <div className="h-0 group-hover:h-12 opacity-0 group-hover:opacity-100 transition-all duration-500 overflow-hidden">
+                          {person.memorialUrl && person.memorialUrl !== '#' ? (
+                            <a 
+                                href={person.memorialUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold text-sm shadow-lg transition-colors"
+                            >
+                                <span>ביקור באתר ההנצחה</span>
+                                <ExternalLink size={14} />
+                            </a>
+                           ) : (
+                            <div className="flex items-center justify-center gap-2 w-full py-3 bg-stone-700/50 text-stone-400 rounded-xl font-medium text-sm border border-stone-600 cursor-default">
+                                <span>טרם הוקם אתר</span>
+                            </div>
+                           )}
+                      </div>
                   </div>
-                )}
               </div>
             </div>
           ))}

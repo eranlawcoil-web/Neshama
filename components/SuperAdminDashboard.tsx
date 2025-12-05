@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import * as mockBackend from '../services/mockBackend';
 import { DeceasedProfile, VisitLog, SystemConfig } from '../types';
@@ -65,10 +64,13 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
       alert('הגדרות מערכת נשמרו בהצלחה');
   };
 
-  const filteredProfiles = profiles.filter(p => 
-      p.fullName.includes(searchTerm) || 
-      p.email?.includes(searchTerm)
-  );
+  // Filter profiles based on search term (Case Insensitive)
+  const filteredProfiles = profiles.filter(p => {
+      const term = searchTerm.toLowerCase();
+      const nameMatch = p.fullName?.toLowerCase().includes(term);
+      const emailMatch = p.email?.toLowerCase().includes(term);
+      return nameMatch || emailMatch;
+  });
 
   // --- Render Tabs ---
 

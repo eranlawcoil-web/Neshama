@@ -2,7 +2,7 @@
 
 import { DeceasedProfile, Memory, VisitLog, SystemConfig } from '../types';
 
-const STORAGE_KEY = 'neshama_profiles_v8'; // Bumped version
+const STORAGE_KEY = 'neshama_profiles_v9'; // Bumped version to ensure new data loads
 const STORAGE_VISITS_KEY = 'neshama_visits_v1';
 const STORAGE_CONFIG_KEY = 'neshama_config_v1';
 const CURRENT_USER_KEY = 'neshama_current_user';
@@ -75,9 +75,12 @@ const initData = () => {
       showInCommunity: true,
       heroImage: 'https://images.unsplash.com/photo-1544979590-7815d383921b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
       shortDescription: 'איש האדמה, מדריך טיולים ואבא למופת. אהב את הארץ לאורכה ולרוחבה.',
-      bio: `דני נולד בקיבוץ דגניה א׳...`,
+      bio: `דני נולד בקיבוץ דגניה א׳, בן למייסדי הקיבוץ. כל חייו היו שזורים באהבת הארץ. כמדריך טיולים, הוא הכיר כל שביל וכל אבן מהחרמון ועד אילת. הוא היה אבא מסור לשלושה ילדים וסבא גאה לחמישה נכדים.`,
       graveLocation: 'בית העלמין האזורי עמק חפר, גוש ג׳, שורה 12',
-      memories: [],
+      memories: [
+          { id: 'm1', year: 1973, author: 'מערכת', content: 'שירת כלוחם בסיירת שקד במלחמת יום הכיפורים.', isOfficial: true, createdAt: Date.now(), tags: [] },
+          { id: 'm2', year: 1985, author: 'יוסי (חבר)', content: 'הטיול הגדול שלנו לדרום אמריקה. דני סחב אותנו לפסגות הכי גבוהות.', isOfficial: false, createdAt: Date.now(), mediaType: 'image', mediaUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80' }
+      ],
       familyMembers: [],
       lastUpdated: Date.now()
     };
@@ -96,16 +99,75 @@ const initData = () => {
       email: 'demo@demo.com',
       heroImage: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1920&q=80',
       shortDescription: 'אמנית בנשמה, ציירת ופסלת שראתה את העולם בצבעים אחרים.',
-      bio: 'שרה הייתה אישה של צבעים...',
+      bio: 'שרה הייתה אישה של צבעים. הסטודיו שלה היה תמיד פתוח לכולם, מלא בריחות של צבעי שמן וטרפנטין. היא האמינה שאמנות יכולה לרפא את הנפש.',
       memories: [],
       familyMembers: [],
-      lastUpdated: Date.now()
+      lastUpdated: Date.now() - 100000
     };
+
+    // --- Profile 3: The Cantor/Musician ---
+    const avraham: DeceasedProfile = {
+        id: 'demo-3',
+        fullName: 'אברהם (אבי) ביטון',
+        birthYear: 1948,
+        birthDate: '1948-08-20',
+        deathYear: 2022,
+        deathDate: '2022-05-10',
+        isPublic: true,
+        accountType: 'standard',
+        showInCommunity: true,
+        email: 'avi@family.com',
+        heroImage: 'https://images.unsplash.com/photo-1516280440614-6697288d5d38?auto=format&fit=crop&w=1920&q=80',
+        shortDescription: 'פייטן וחזן שקולו הרטיט לבבות. איש של מסורת וניגון.',
+        bio: 'אברהם גדל בבית מוזיקלי במרוקו ועלה לארץ כנער. קול הטנור שלו היה סימן ההיכר של בית הכנסת השכונתי במשך 40 שנה.',
+        memories: [],
+        familyMembers: [],
+        lastUpdated: Date.now() - 200000
+    };
+
+    // --- Profile 4: The Grandmother ---
+    const rivka: DeceasedProfile = {
+        id: 'demo-4',
+        fullName: 'רבקה אהרוני',
+        birthYear: 1935,
+        birthDate: '1935-12-05',
+        deathYear: 2021,
+        deathDate: '2021-09-15',
+        isPublic: true,
+        accountType: 'standard',
+        showInCommunity: true,
+        email: 'grandma@family.com',
+        heroImage: 'https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&w=1920&q=80',
+        shortDescription: 'עמוד התווך של המשפחה, בשלנית בחסד ואשת חינוך.',
+        bio: 'סבתא רבקה הייתה המורה המיתולוגית של בית הספר היסודי. דורות של תלמידים זוכרים אותה. המטבח שלה היה הלב הפועם של המשפחה בימי שישי.',
+        memories: [],
+        familyMembers: [],
+        lastUpdated: Date.now() - 300000
+    };
+
+    // --- Profile 5: The Surfer/Youth ---
+    const yossi: DeceasedProfile = {
+        id: 'demo-5',
+        fullName: 'יוסי (ג׳ו) כהן',
+        birthYear: 1995,
+        birthDate: '1995-07-22',
+        deathYear: 2023,
+        deathDate: '2023-10-07',
+        isPublic: true,
+        accountType: 'free',
+        showInCommunity: true,
+        email: 'joe@surf.com',
+        heroImage: 'https://images.unsplash.com/photo-1502680390469-be75c702a180?auto=format&fit=crop&w=1920&q=80',
+        shortDescription: 'ילד של ים, גלישה וחופש. החיוך שלו האיר כל חדר.',
+        bio: 'יוסי אהב את הים יותר מכל. הוא היה מדריך גלישה שנתן השראה לאלפי ילדים להתמודד עם הפחדים שלהם ולקפוץ למים.',
+        memories: [],
+        familyMembers: [],
+        lastUpdated: Date.now() - 400000
+    };
+
+    const initialProfiles = [daniel, sarah, avraham, rivka, yossi];
     
-    // Minimal data for others to save space in this view, 
-    // assuming similar structure to previous mock data but with 'isPublic: true'
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([daniel, sarah]));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initialProfiles));
   }
 };
 
@@ -133,20 +195,16 @@ export const getCommunityProfiles = (): DeceasedProfile[] => {
     // 1. Get manually pinned profiles
     const pinned = allProfiles.filter(p => p.showInCommunity);
     
-    // 2. Get recent 5 profiles (sorted by update or creation)
-    const recent = [...allProfiles]
-        .sort((a, b) => (b.lastUpdated || 0) - (a.lastUpdated || 0))
-        .slice(0, 5);
+    // 2. Get recent profiles (sorted by update or creation), excluding already pinned ones to avoid duplicates
+    const recent = allProfiles
+        .filter(p => !pinned.find(pin => pin.id === p.id))
+        .sort((a, b) => (b.lastUpdated || 0) - (a.lastUpdated || 0));
         
-    // 3. Combine and deduplicate
-    const combined = [...pinned];
-    recent.forEach(p => {
-        if (!combined.find(c => c.id === p.id)) {
-            combined.push(p);
-        }
-    });
+    // 3. Combine: Pinned first, then fill remainder with recent to ensure at least 5 if possible
+    const combined = [...pinned, ...recent];
     
-    return combined;
+    // Return at least the top 5 (or all if less than 5)
+    return combined.slice(0, Math.max(5, combined.length));
 };
 
 export const getProfileById = (id: string): DeceasedProfile | undefined => {
@@ -256,7 +314,7 @@ export const saveProfile = (profile: DeceasedProfile): DeceasedProfile | null =>
 export const createNewDraft = (): DeceasedProfile => {
     return {
         id: `draft-${Date.now()}`,
-        fullName: 'שם הנפטר/ת',
+        fullName: 'שם המונצח/ת',
         birthYear: 1950,
         deathYear: 2024,
         heroImage: 'https://images.unsplash.com/photo-1494548162494-384bba4ab999?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',

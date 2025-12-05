@@ -1,17 +1,17 @@
 
-
 import React, { useState } from 'react';
 import { Memory } from '../types';
-import { Trash2, Edit2, PlayCircle, Music, X, ZoomIn, MapPin } from 'lucide-react';
+import { Trash2, Edit2, PlayCircle, Music, X, ZoomIn, MapPin, Feather } from 'lucide-react';
 
 interface TimelineProps {
   memories: Memory[];
   isAdmin: boolean;
   onDelete: (id: string) => void;
   onEdit: (memory: Memory) => void;
+  onAddMemory?: () => void;
 }
 
-const Timeline: React.FC<TimelineProps> = ({ memories, isAdmin, onDelete, onEdit }) => {
+const Timeline: React.FC<TimelineProps> = ({ memories, isAdmin, onDelete, onEdit, onAddMemory }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const sortedMemories = [...memories].sort((a, b) => {
@@ -68,7 +68,7 @@ const Timeline: React.FC<TimelineProps> = ({ memories, isAdmin, onDelete, onEdit
       {/* Decorative Top Node */}
       <div className="absolute left-1/2 transform -translate-x-1/2 top-0 w-4 h-4 rounded-full bg-amber-200 blur-sm"></div>
 
-      <div className="space-y-24">
+      <div className="space-y-24 pb-20">
         {sortedMemories.map((memory, index) => {
           const isEven = index % 2 === 0;
           return (
@@ -162,11 +162,34 @@ const Timeline: React.FC<TimelineProps> = ({ memories, isAdmin, onDelete, onEdit
         })}
       </div>
       
-      {/* Bottom Infinity Symbol */}
-      <div className="relative flex justify-center mt-32">
-        <div className="w-20 h-20 bg-gradient-to-br from-white to-amber-50 rounded-full flex items-center justify-center text-amber-800/50 border border-white shadow-xl z-10">
-          <span className="font-serif-hebrew text-4xl">∞</span>
-        </div>
+      {/* Post-Death Invitation Node */}
+      <div className="relative flex flex-col items-center justify-center mt-12 gap-6 pb-20">
+         <div className="w-16 h-16 bg-gradient-to-br from-white to-amber-50 rounded-full flex items-center justify-center text-amber-500 border border-amber-100 shadow-xl z-10 relative">
+             <div className="absolute inset-0 bg-amber-500/10 rounded-full animate-ping"></div>
+             <Feather size={24} />
+         </div>
+         
+         <div className="text-center z-10">
+             <h3 className="text-xl font-serif-hebrew text-stone-700 font-bold mb-2">הסיפור ממשיך דרככם</h3>
+             <p className="text-stone-500 max-w-sm mx-auto mb-6 text-sm">
+                גם לאחר הפרידה, הזכרונות ממשיכים לחיות. אתם מוזמנים להוסיף ברכות, געגועים וזכרונות מהיום.
+             </p>
+             {onAddMemory && (
+                 <button 
+                    onClick={onAddMemory}
+                    className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all hover:scale-105"
+                 >
+                    הוסף זיכרון או ברכה
+                 </button>
+             )}
+         </div>
+
+         {/* Bottom Infinity Symbol */}
+         <div className="relative flex justify-center mt-12 opacity-50">
+            <div className="w-16 h-16 flex items-center justify-center text-stone-300">
+                <span className="font-serif-hebrew text-4xl">∞</span>
+            </div>
+         </div>
       </div>
 
       {/* Lightbox Modal */}

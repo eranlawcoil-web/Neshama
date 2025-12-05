@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { DeceasedProfile, Memory, SystemConfig } from './types';
 import * as mockBackend from './services/mockBackend';
@@ -12,6 +11,7 @@ import Landing from './components/Landing';
 import AuthModal from './components/AuthModal';
 import PaymentModal from './components/PaymentModal';
 import SuperAdminDashboard from './components/SuperAdminDashboard';
+import ProfileSearch from './components/ProfileSearch';
 import { LogIn, LogOut, Plus, ShieldAlert, ShoppingCart, Eye, ArrowRight, Settings, Gift, CheckCircle, Flame } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -85,6 +85,7 @@ const App: React.FC = () => {
         if (selected) {
             setProfile(selected);
             setView('profile');
+            window.scrollTo(0,0);
         } else {
             console.error("Profile not found");
         }
@@ -334,6 +335,12 @@ const App: React.FC = () => {
                 </div>
 
                 {!isScrolled && (
+                   <div className="hidden lg:flex items-center gap-4">
+                       <ProfileSearch onSelectProfile={handleSelectProfile} variant="light" />
+                   </div>
+                )}
+
+                {!isScrolled && (
                     <div className="hidden md:block text-2xl font-bold font-serif-hebrew text-amber-600 opacity-80 absolute left-1/2 transform -translate-x-1/2">
                         {profile.fullName}
                     </div>
@@ -457,6 +464,7 @@ const App: React.FC = () => {
           isAdmin={isAdmin} 
           onDelete={handleDeleteMemory}
           onEdit={(m) => setEditingMemory(m)}
+          onAddMemory={() => setShowMemoryForm(true)}
         />
       </main>
 
