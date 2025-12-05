@@ -90,7 +90,7 @@ const Timeline: React.FC<TimelineProps> = ({ memories, isAdmin, onDelete, onEdit
                   className={`
                     p-8 rounded-3xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] 
                     transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.12)]
-                    relative backdrop-blur-sm border
+                    relative backdrop-blur-sm border group/card
                     ${memory.isOfficial 
                       ? 'bg-white/90 border-amber-200' 
                       : 'bg-white/80 border-white'}
@@ -101,6 +101,26 @@ const Timeline: React.FC<TimelineProps> = ({ memories, isAdmin, onDelete, onEdit
                      ${isEven ? '-top-2 -right-2' : '-top-2 -left-2'}
                   `}>❝</span>
 
+                  {/* Admin Actions - Now with higher Z-Index */}
+                  {isAdmin && (
+                    <div className="absolute top-4 left-4 z-20 opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-opacity flex gap-2">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onEdit(memory); }} 
+                        className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 hover:scale-110 shadow-sm border border-blue-100 transition-all"
+                        title="ערוך זיכרון"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onDelete(memory.id); }} 
+                        className="w-9 h-9 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 hover:scale-110 shadow-sm border border-red-100 transition-all"
+                        title="מחק זיכרון"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
+
                   {/* Header: Year & Author */}
                   <div className="flex items-center gap-3 mb-4 relative z-10">
                      <span className="px-4 py-1 bg-stone-900 text-amber-50 text-sm font-bold rounded-full shadow-md">
@@ -110,18 +130,6 @@ const Timeline: React.FC<TimelineProps> = ({ memories, isAdmin, onDelete, onEdit
                         {memory.isOfficial ? 'נקודת ציון' : `מאת ${memory.author}`}
                      </span>
                   </div>
-
-                  {/* Admin Actions */}
-                  {isAdmin && (
-                    <div className="absolute top-6 left-6 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                      <button onClick={() => onEdit(memory)} className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors">
-                        <Edit2 size={14} />
-                      </button>
-                      <button onClick={() => onDelete(memory.id)} className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  )}
 
                   {/* Content */}
                   <div className="relative z-10">

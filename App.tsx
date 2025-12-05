@@ -53,8 +53,12 @@ const App: React.FC = () => {
   const handleUpdateProfile = (updated: Partial<DeceasedProfile>) => {
     if (!profile) return;
     const newProfile = { ...profile, ...updated };
-    mockBackend.saveProfile(newProfile);
-    setProfile(newProfile);
+    const success = mockBackend.saveProfile(newProfile);
+    if (success) {
+        setProfile(newProfile);
+    } else {
+        alert('שגיאה בשמירת הנתונים. ייתכן והתמונה גדולה מדי לאחסון המקומי.');
+    }
   };
 
   const handleAddMemory = (memoryData: Omit<Memory, 'id' | 'createdAt'>) => {
@@ -71,9 +75,13 @@ const App: React.FC = () => {
       memories: [...profile.memories, newMemory]
     };
 
-    mockBackend.saveProfile(updatedProfile);
-    setProfile(updatedProfile);
-    setShowMemoryForm(false);
+    const success = mockBackend.saveProfile(updatedProfile);
+    if (success) {
+        setProfile(updatedProfile);
+        setShowMemoryForm(false);
+    } else {
+        alert('שגיאה בשמירת הזיכרון. ייתכן והקובץ המצורף גדול מדי.');
+    }
   };
 
   const handleEditMemory = (memoryData: Omit<Memory, 'id' | 'createdAt'>) => {
@@ -84,9 +92,13 @@ const App: React.FC = () => {
     );
 
     const updatedProfile = { ...profile, memories: updatedMemories };
-    mockBackend.saveProfile(updatedProfile);
-    setProfile(updatedProfile);
-    setEditingMemory(null);
+    const success = mockBackend.saveProfile(updatedProfile);
+    if (success) {
+        setProfile(updatedProfile);
+        setEditingMemory(null);
+    } else {
+        alert('שגיאה בשמירת השינויים.');
+    }
   };
 
   const handleDeleteMemory = (id: string) => {
@@ -98,8 +110,10 @@ const App: React.FC = () => {
       memories: profile.memories.filter(m => m.id !== id)
     };
     
-    mockBackend.saveProfile(updatedProfile);
-    setProfile(updatedProfile);
+    const success = mockBackend.saveProfile(updatedProfile);
+    if (success) {
+        setProfile(updatedProfile);
+    }
   };
 
   if (!profile) return <div className="flex h-screen items-center justify-center">טוען...</div>;
