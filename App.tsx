@@ -12,7 +12,7 @@ import Landing from './components/Landing';
 import AuthModal from './components/AuthModal';
 import PaymentModal from './components/PaymentModal';
 import SuperAdminDashboard from './components/SuperAdminDashboard';
-import { LogIn, LogOut, Plus, ShieldAlert, ShoppingCart, Eye, ArrowRight, Settings } from 'lucide-react';
+import { LogIn, LogOut, Plus, ShieldAlert, ShoppingCart, Eye, ArrowRight, Settings, Gift, CheckCircle } from 'lucide-react';
 
 const App: React.FC = () => {
   // Navigation State
@@ -37,6 +37,20 @@ const App: React.FC = () => {
       setCurrentUser(user);
     }
   }, []);
+
+  // Tracking Effect
+  useEffect(() => {
+      if (view === 'profile' && profile) {
+          // Log visit when entering a profile view
+          // We use a small timeout to ensure we don't log rapid switches or draft creations
+          const timer = setTimeout(() => {
+              // Don't log admin's own visits to their own profile if we want strictly external usage,
+              // but request was "who entered", so logging everyone is safer.
+              mockBackend.logVisit(profile, currentUser || undefined);
+          }, 1000);
+          return () => clearTimeout(timer);
+      }
+  }, [profile?.id, view]);
 
   const handleStartCreate = () => {
     // Create a new draft profile in memory
@@ -142,6 +156,17 @@ const App: React.FC = () => {
       alert('תודה רבה! האתר פורסם בהצלחה וכעת הוא זמין לכולם.');
   };
 
+  // Skip payment for free accounts
+  const handleFreePublish = () => {
+    if (!profile) return;
+    const updatedProfile = { ...profile, isPublic: true };
+    const saved = mockBackend.saveProfile(updatedProfile);
+    if (saved) {
+        setProfile(saved);
+        alert('האתר פורסם בהצלחה!');
+    }
+  };
+
   const handleAddMemory = (memoryData: Omit<Memory, 'id' | 'createdAt'>) => {
     if (!profile) return;
     
@@ -209,15 +234,24 @@ const App: React.FC = () => {
 
   if (view === 'landing') {
       return (
-          <Landing 
-            profiles={mockBackend.getProfiles().filter(p => p.isPublic)} 
-            onCreate={handleStartCreate}
-            onSelectProfile={handleSelectProfile}
-            onLogin={() => {
-                setAuthMode('login');
-                setShowAuthModal(true);
-            }}
-          />
+          <>
+            <Landing 
+                profiles={mockBackend.getProfiles().filter(p => p.isPublic)} 
+                onCreate={handleStartCreate}
+                onSelectProfile={handleSelectProfile}
+                onLogin={() => {
+                    setAuthMode('login');
+                    setShowAuthModal(true);
+                }}
+            />
+            {showAuthModal && (
+                <AuthModal 
+                    isSavingDraft={authMode === 'save'}
+                    onSuccess={handleAuthSuccess}
+                    onCancel={() => setShowAuthModal(false)}
+                />
+            )}
+          </>
       );
   }
 
@@ -238,7 +272,7 @@ const App: React.FC = () => {
                 className="flex items-center gap-2 text-stone-600 hover:text-amber-600 transition-colors bg-white/50 px-3 py-1.5 rounded-full hover:bg-white"
              >
                 <ArrowRight size={18} />
-                <span className="font-bold text-sm">חזרה לעץ החיים</span>
+                <span className="font-bold text-sm">חזרה לאתר ההנצחה</span>
              </button>
 
              {/* Site Name (Hidden on small screens if back button is present) */}
@@ -280,7 +314,7 @@ const App: React.FC = () => {
                   className="bg-stone-800 text-white text-xs md:text-sm px-3 py-2 rounded-lg hover:bg-black transition-colors flex items-center gap-2 shadow-lg"
                 >
                   <Settings size={14} />
-                  <span>ניהול הנצחה</span>
+                  <span>ניהול אתר הנצחה</span>
                 </button>
              </div>
           )}
@@ -305,23 +339,34 @@ const App: React.FC = () => {
                   </div>
                   <div>
                       <h3 className="font-bold text-lg">מצב טיוטה (פרטי)</h3>
-                      <p className="text-stone-400 text-sm">האתר אינו גלוי לציבור. כדי לשתף אותו עם המשפחה והחברים, יש להפעיל מנוי.</p>
+                      <p className="text-stone-400 text-sm">האתר אינו גלוי לציבור. {profile.accountType === 'free' ? 'לחץ על הכפתור כדי לפרסם אותו.' : 'כדי לשתף אותו, יש להפעיל מנוי.'}</p>
                   </div>
               </div>
-              <button 
-                onClick={() => {
-                    if(!currentUser) {
-                        setAuthMode('save');
-                        setShowAuthModal(true);
-                    } else {
-                        setShowPaymentModal(true);
-                    }
-                }}
-                className="bg-amber-500 hover:bg-amber-400 text-stone-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
-              >
-                  <ShoppingCart size={20}/>
-                  רכוש מנוי והפץ (₪150/שנה)
-              </button>
+              
+              {profile.accountType === 'free' ? (
+                  <button 
+                    onClick={handleFreePublish}
+                    className="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
+                  >
+                      <CheckCircle size={20}/>
+                      פרסם אתר (ללא עלות)
+                  </button>
+              ) : (
+                  <button 
+                    onClick={() => {
+                        if(!currentUser) {
+                            setAuthMode('save');
+                            setShowAuthModal(true);
+                        } else {
+                            setShowPaymentModal(true);
+                        }
+                    }}
+                    className="bg-amber-500 hover:bg-amber-400 text-stone-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
+                  >
+                      <ShoppingCart size={20}/>
+                      רכוש מנוי והפץ (₪150/שנה)
+                  </button>
+              )}
           </div>
       )}
 
@@ -336,7 +381,7 @@ const App: React.FC = () => {
       {/* Main Content - Timeline */}
       <main className="pb-8 relative">
         <div className="text-center mt-12 mb-8 px-4">
-           <h2 className="text-3xl font-serif-hebrew text-stone-800">עץ החיים</h2>
+           <h2 className="text-3xl font-serif-hebrew text-stone-800">אתר ההנצחה</h2>
            <p className="text-stone-500 mt-2">מסע בזמן דרך רגעים, תמונות וזכרונות</p>
         </div>
 

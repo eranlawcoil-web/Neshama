@@ -45,7 +45,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, onCreate, onLogin, onSelect
            className="text-2xl font-serif-hebrew font-bold text-amber-500 tracking-wide cursor-pointer hover:text-amber-400 transition-colors"
            onClick={() => window.location.reload()}
          >
-            עץ החיים
+            אתר הנצחה
          </div>
          <div className="flex gap-6 items-center">
             <button onClick={onLogin} className="text-sm font-bold text-stone-300 hover:text-white transition-colors uppercase tracking-widest">

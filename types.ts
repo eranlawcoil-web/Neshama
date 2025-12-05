@@ -11,6 +11,8 @@ export interface Memory {
   createdAt: number;
   mediaType?: MediaType;
   mediaUrl?: string; // URL or Base64
+  locationName?: string; // e.g. "Hospital", "Event Hall"
+  locationUrl?: string; // Google Maps / Waze link
   tags?: string[];
 }
 
@@ -47,9 +49,18 @@ export interface DeceasedProfile {
   isPublic: boolean; // False = Draft/Private, True = Paid/Public
   isDraft?: boolean; // True during initial creation before first save
   subscriptionExpiry?: number;
+  accountType?: 'free' | 'standard'; // 'free' = VIP/Community (No payment needed), 'standard' = Needs payment
 }
 
 export interface User {
   email: string;
   isAdmin: boolean;
+}
+
+export interface VisitLog {
+    id: string;
+    profileId: string;
+    profileName: string;
+    visitorEmail: string; // "Guest" or email
+    timestamp: number;
 }

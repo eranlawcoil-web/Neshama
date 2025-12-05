@@ -1,7 +1,8 @@
 
+
 import React, { useState } from 'react';
 import { Memory } from '../types';
-import { Trash2, Edit2, PlayCircle, Music, X, ZoomIn } from 'lucide-react';
+import { Trash2, Edit2, PlayCircle, Music, X, ZoomIn, MapPin } from 'lucide-react';
 
 interface TimelineProps {
   memories: Memory[];
@@ -136,7 +137,23 @@ const Timeline: React.FC<TimelineProps> = ({ memories, isAdmin, onDelete, onEdit
                     <p className={`text-stone-700 leading-relaxed font-light whitespace-pre-wrap ${memory.content.length < 50 ? 'text-xl' : 'text-lg'}`}>
                         {memory.content}
                     </p>
+                    
                     {renderMedia(memory)}
+
+                    {/* Location Link */}
+                    {memory.locationUrl && (
+                        <div className="mt-4 pt-4 border-t border-stone-100">
+                             <a 
+                                href={memory.locationUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium transition-colors"
+                             >
+                                <MapPin size={16} />
+                                {memory.locationName || 'צפה במיקום'}
+                             </a>
+                        </div>
+                    )}
                   </div>
                 </div>
               </div>

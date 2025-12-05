@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Memory, MediaType } from '../types';
 import { polishMemory } from '../services/geminiService';
-import { Wand2, Loader2, Image as ImageIcon, Video, Music, X } from 'lucide-react';
+import { Wand2, Loader2, Image as ImageIcon, Video, Music, X, MapPin } from 'lucide-react';
 
 interface MemoryFormProps {
   isAdmin: boolean;
@@ -22,6 +22,11 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
   const [mediaType, setMediaType] = useState<MediaType>(null);
   const [mediaUrl, setMediaUrl] = useState('');
 
+  // Location State
+  const [showLocation, setShowLocation] = useState(false);
+  const [locationName, setLocationName] = useState('');
+  const [locationUrl, setLocationUrl] = useState('');
+
   useEffect(() => {
     if (initialData) {
       setYear(initialData.year);
@@ -30,6 +35,9 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
       setIsOfficial(initialData.isOfficial);
       setMediaType(initialData.mediaType || null);
       setMediaUrl(initialData.mediaUrl || '');
+      setLocationName(initialData.locationName || '');
+      setLocationUrl(initialData.locationUrl || '');
+      if (initialData.locationUrl) setShowLocation(true);
     } else {
       // Default for new memories
       if (isAdmin) {
@@ -54,7 +62,9 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
       content,
       isOfficial,
       mediaType: mediaUrl ? mediaType : null,
-      mediaUrl: mediaUrl || undefined
+      mediaUrl: mediaUrl || undefined,
+      locationName: showLocation ? locationName : undefined,
+      locationUrl: showLocation ? locationUrl : undefined
     });
   };
 
@@ -82,7 +92,7 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-serif-hebrew font-bold text-gray-800 mb-6 text-center">
-          {initialData ? 'עריכת זיכרון' : 'הוספת זיכרון לעץ החיים'}
+          {initialData ? 'עריכת זיכרון' : 'הוספת זיכרון לאתר ההנצחה'}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -111,9 +121,9 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
             </div>
           </div>
 
-          {/* Media Selection */}
+          {/* Media & Location Selection */}
           <div className="bg-stone-50 p-4 rounded-lg border border-stone-200">
-            <span className="block text-sm font-medium text-gray-700 mb-2">צרף מדיה (רשות)</span>
+            <span className="block text-sm font-medium text-gray-700 mb-2">תוספות (רשות)</span>
             <div className="flex gap-2 mb-3">
               <button
                 type="button"
@@ -129,7 +139,7 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
                 className={`flex-1 flex flex-col items-center p-2 rounded border ${mediaType === 'video' ? 'bg-amber-100 border-amber-500 text-amber-700' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
               >
                 <Video size={20} />
-                <span className="text-xs mt-1">וידאו (Link)</span>
+                <span className="text-xs mt-1">וידאו</span>
               </button>
               <button
                 type="button"
@@ -137,12 +147,21 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
                 className={`flex-1 flex flex-col items-center p-2 rounded border ${mediaType === 'audio' ? 'bg-amber-100 border-amber-500 text-amber-700' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
               >
                 <Music size={20} />
-                <span className="text-xs mt-1">שיר (Link)</span>
+                <span className="text-xs mt-1">אודיו</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowLocation(!showLocation); }}
+                className={`flex-1 flex flex-col items-center p-2 rounded border ${showLocation ? 'bg-amber-100 border-amber-500 text-amber-700' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
+              >
+                <MapPin size={20} />
+                <span className="text-xs mt-1">מיקום</span>
               </button>
             </div>
 
+            {/* Media Inputs */}
             {mediaType === 'image' && (
-              <div className="relative">
+              <div className="relative mb-3">
                  {mediaUrl ? (
                    <div className="relative w-full h-32 bg-gray-100 rounded overflow-hidden">
                      <img src={mediaUrl} alt="Preview" className="w-full h-full object-cover" />
@@ -158,7 +177,7 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
             )}
 
             {(mediaType === 'video' || mediaType === 'audio') && (
-              <div>
+              <div className="mb-3">
                 <input 
                   type="url" 
                   value={mediaUrl} 
@@ -167,6 +186,27 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
                   className="w-full p-2 text-sm border rounded"
                 />
               </div>
+            )}
+
+            {/* Location Inputs */}
+            {showLocation && (
+                <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-stone-200">
+                    <input 
+                       type="text"
+                       value={locationName}
+                       onChange={(e) => setLocationName(e.target.value)}
+                       placeholder="שם המקום (לדוגמה: בי״ח תל השומר)"
+                       className="w-full p-2 text-sm border rounded"
+                    />
+                    <input 
+                       type="url"
+                       value={locationUrl}
+                       onChange={(e) => setLocationUrl(e.target.value)}
+                       placeholder="לינק (Waze/Maps)"
+                       dir="ltr"
+                       className="w-full p-2 text-sm border rounded text-right"
+                    />
+                </div>
             )}
           </div>
 
@@ -223,7 +263,7 @@ const MemoryForm: React.FC<MemoryFormProps> = ({ isAdmin, onSubmit, onCancel, in
               type="submit"
               className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 shadow-lg"
             >
-              {initialData ? 'שמור שינויים' : 'הוסף לעץ'}
+              {initialData ? 'שמור שינויים' : 'הוסף לזיכרון'}
             </button>
           </div>
         </form>

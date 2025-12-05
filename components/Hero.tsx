@@ -1,7 +1,8 @@
 
+
 import React, { useState } from 'react';
 import { DeceasedProfile, RelatedPerson } from '../types';
-import { Camera, Edit3, Wand2, Loader2, Info, Play, Music, MapPin, Calendar, X, Navigation, Save, Users, Plus, Trash2 } from 'lucide-react';
+import { Camera, Edit3, Wand2, Loader2, Info, Play, Music, MapPin, Calendar, X, Navigation, Save, Users, Plus, Trash2, Share2, Check, Flame } from 'lucide-react';
 import { generateTribute } from '../services/geminiService';
 
 interface HeroProps {
@@ -28,6 +29,10 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
   const [keywords, setKeywords] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
+  
+  // Candle State
+  const [isCandleLit, setIsCandleLit] = useState(false);
 
   // Edit fields for Info Modal (Location, Playlist etc)
   const [extraInfo, setExtraInfo] = useState({
@@ -48,6 +53,17 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
       shortDescription: '',
       memorialUrl: ''
   });
+
+  // When entering edit mode, strip the Z"L so it's clean for the user
+  const handleStartEdit = () => {
+      let cleanName = profile.fullName;
+      if (cleanName.endsWith(' ז״ל')) {
+          cleanName = cleanName.replace(' ז״ל', '');
+      }
+      setEditForm(prev => ({ ...prev, fullName: cleanName }));
+      setFamilyMembers(profile.familyMembers || []);
+      setIsEditingMode(true);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -141,6 +157,12 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
     setShowInfoModal(false);
   };
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 2000);
+  };
+
   // Helper to format date DD.MM.YYYY
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
@@ -158,6 +180,34 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
           className="w-full h-full object-cover opacity-25 blur-sm scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/60 to-black/40"></div>
+      </div>
+      
+      {/* Memorial Candle */}
+      <div className="absolute top-24 left-4 z-20 md:top-32 md:left-12">
+        <div className="flex flex-col items-center gap-2">
+            <button 
+                onClick={() => setIsCandleLit(true)}
+                className={`relative group w-12 h-16 md:w-16 md:h-20 rounded-t-full border-b-8 shadow-2xl transition-all duration-1000 ${isCandleLit ? 'bg-amber-100/90 border-amber-800 shadow-[0_0_40px_rgba(251,191,36,0.6)]' : 'bg-stone-700/50 border-stone-800 hover:bg-stone-600'}`}
+                title={isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר זיכרון'}
+            >
+                {/* Flame Animation */}
+                {isCandleLit ? (
+                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-4 h-8 bg-orange-400 rounded-full blur-[2px] animate-pulse">
+                        <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-yellow-200 rounded-full blur-[1px]"></div>
+                    </div>
+                ) : (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-1 h-3 bg-stone-900 rounded-full"></div>
+                )}
+                
+                {/* Candle Body */}
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+                   <Flame size={isCandleLit ? 24 : 20} className={`transition-colors duration-700 ${isCandleLit ? 'text-amber-500 opacity-50' : 'text-stone-500'}`} />
+                </div>
+            </button>
+            <span className={`text-xs font-bold transition-opacity duration-700 ${isCandleLit ? 'text-amber-400 opacity-100' : 'text-stone-500 opacity-0 group-hover:opacity-100'}`}>
+                {isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר'}
+            </span>
+        </div>
       </div>
 
       <div className="relative z-10 container mx-auto px-4 pt-24 flex flex-col items-center text-center">
@@ -361,9 +411,30 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
           </div>
         ) : (
           <>
-            <h1 className="text-5xl md:text-8xl font-serif-hebrew font-bold mb-4 tracking-wide text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-200 to-amber-500 drop-shadow-sm leading-tight">
-              {profile.fullName}
-            </h1>
+            <div className="flex items-center justify-center gap-4 mb-4 group">
+              <h1 className="text-5xl md:text-8xl font-serif-hebrew font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-200 to-amber-500 drop-shadow-sm leading-tight">
+                {profile.fullName}
+              </h1>
+              {isAdmin && (
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      onClick={handleStartEdit}
+                      className="bg-white/10 hover:bg-white/20 text-amber-500 hover:text-amber-400 p-3 rounded-full backdrop-blur shadow-lg border border-white/5"
+                      title="ערוך פרטים"
+                    >
+                      <Edit3 size={24} />
+                    </button>
+                    <button
+                      onClick={handleShare}
+                      className="bg-white/10 hover:bg-white/20 text-amber-500 hover:text-amber-400 p-3 rounded-full backdrop-blur shadow-lg border border-white/5"
+                      title="העתק קישור"
+                    >
+                      {showCopied ? <Check size={24} /> : <Share2 size={24} />}
+                    </button>
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center gap-4 text-xl md:text-2xl text-stone-300 font-light tracking-widest mb-6 dir-ltr opacity-90">
               <span className="font-mono">{formatDate(profile.birthDate) || profile.birthYear}</span>
               <span className="w-12 h-[1px] bg-stone-500"></span>
@@ -409,19 +480,6 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
 
             {/* Bio Section */}
             <div className="max-w-4xl mx-auto relative group">
-              {isAdmin && (
-                <button 
-                  onClick={() => {
-                     setFamilyMembers(profile.familyMembers || []);
-                     setIsEditingMode(true);
-                  }}
-                  className="absolute -top-12 right-0 md:-right-12 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur transition-all opacity-0 group-hover:opacity-100 shadow-lg"
-                  title="ערוך פרטים וביוגרפיה"
-                >
-                  <Edit3 size={20} />
-                </button>
-              )}
-              
               <div className="relative p-8 md:p-12 bg-gradient-to-b from-white/5 to-transparent rounded-3xl border border-white/5 shadow-2xl backdrop-blur-sm mb-12">
                  <span className="text-7xl text-amber-500/10 absolute -top-8 -right-6 font-serif select-none">❝</span>
                  <p className="text-lg md:text-xl font-heebo font-light leading-relaxed text-stone-200 whitespace-pre-line text-right">
