@@ -91,29 +91,29 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
       </nav>
 
       {/* --- SECTION 1: HERO / INTRO (Half Height) --- */}
-      <header className="relative h-[65vh] flex items-center justify-center overflow-hidden">
+      <header className="relative h-[60vh] flex items-center justify-center overflow-hidden border-b border-white/5">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
              <img 
                src="https://images.unsplash.com/photo-1499578124509-1611b77778c8?q=80&w=1920&auto=format&fit=crop" 
                alt="Background" 
-               className="w-full h-full object-cover opacity-60"
+               className="w-full h-full object-cover opacity-50"
              />
-             <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/60 to-black/40"></div>
+             <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/80 to-black/40"></div>
           </div>
 
-          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-             <div className="flex justify-center gap-2 mb-6">
-                 <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase flex items-center gap-2">
-                    <Heart size={12} fill="currentColor" /> פשוט. מכובד. מרגש.
+          <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+             <div className="flex justify-center mb-6">
+                 <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-4 py-1.5 rounded-full text-sm font-bold tracking-wider uppercase flex items-center gap-2">
+                    <Heart size={14} fill="currentColor" /> פשוט. מכובד. מרגש.
                  </span>
              </div>
              
              <h1 className="text-4xl md:text-6xl font-serif-hebrew font-bold mb-6 leading-tight text-white drop-shadow-2xl">
-                אתר ליצירת אתרי הנצחה לאהובים
+                זהו אתר ליצירת אתרי הנצחה לאהובים
              </h1>
              
-             <p className="text-lg md:text-2xl text-stone-300 mb-10 font-light leading-relaxed max-w-2xl mx-auto">
+             <p className="text-lg md:text-2xl text-stone-300 mb-10 font-light leading-relaxed max-w-3xl mx-auto">
                 בקלות ובפשטות, בשיתוף עם משפחה וחברים, <br className="hidden md:block"/>
                 יוצרים יחד <span className="text-amber-400 font-bold">עץ חיים</span> להנצחת יקירנו.
              </p>
@@ -124,81 +124,53 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
                     className="group flex items-center justify-center gap-3 bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-full text-lg font-bold transition-all hover:scale-105 shadow-[0_0_30px_-10px_rgba(217,119,6,0.6)]"
                 >
                     <Plus size={24} />
-                    <span>התחל בחינם</span>
+                    <span>צור אתר לזכר יקירך</span>
                 </button>
              </div>
           </div>
       </header>
 
-      {/* --- SECTION 2: COMMUNITY SHOWCASE (Smaller Slider) --- */}
-      <section className="bg-stone-950 py-16 px-4 md:px-12 flex-1 flex flex-col justify-center relative border-t border-white/5">
-          <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row gap-12 items-center">
+      {/* --- SECTION 2: COMMUNITY SHOWCASE (Compact Slider) --- */}
+      <section className="bg-stone-950 py-12 px-4 md:px-12 flex-1 flex flex-col items-center justify-start relative">
+          <div className="max-w-4xl mx-auto w-full flex flex-col gap-8 items-center">
               
-              {/* Text Side */}
-              <div className="md:w-1/3 text-center md:text-right">
-                  <div className="flex items-center justify-center md:justify-start gap-2 text-stone-500 mb-2">
-                     <Users size={20} />
-                     <span className="text-sm font-bold tracking-widest uppercase">הקהילה שלנו</span>
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-serif-hebrew font-bold text-stone-100 mb-4">
-                      דוגמאות מהקהילה
+              <div className="text-center">
+                  <h2 className="text-2xl md:text-3xl font-serif-hebrew font-bold text-stone-100 mb-2 flex items-center justify-center gap-2">
+                      <Users className="text-amber-500" size={24}/> דוגמאות מהקהילה
                   </h2>
-                  <p className="text-stone-400 mb-8 leading-relaxed">
-                      קבלו השראה מאתרי הנצחה שיצרו משתמשים אחרים. 
-                      כל אתר הוא עולם ומלואו של זכרונות, תמונות וסיפורים.
-                  </p>
-                  
-                  {/* Custom Navigation Controls */}
-                  <div className="flex gap-3 justify-center md:justify-start">
-                     <button 
-                         onClick={() => changeSlide('prev')}
-                         className="w-12 h-12 rounded-full border border-stone-700 hover:bg-stone-800 text-stone-300 flex items-center justify-center transition-colors"
-                     >
-                         <ChevronRight size={24} />
-                     </button>
-                     <button 
-                         onClick={() => changeSlide('next')}
-                         className="w-12 h-12 rounded-full border border-stone-700 hover:bg-stone-800 text-stone-300 flex items-center justify-center transition-colors"
-                     >
-                         <ChevronLeft size={24} />
-                     </button>
-                  </div>
               </div>
 
-              {/* Slider Side - Contained Size */}
-              <div className="md:w-2/3 w-full">
-                  <div className="relative w-full aspect-video md:aspect-[21/9] bg-stone-900 rounded-3xl overflow-hidden shadow-2xl border border-stone-800 group">
+              {/* Slider Side - Smaller & Compact */}
+              <div className="w-full relative group">
+                  <div className="relative w-full aspect-video md:aspect-[2.5/1] bg-stone-900 rounded-2xl overflow-hidden shadow-2xl border border-stone-800">
                       {displayProfiles.map((profile, index) => {
-                            let positionClass = 'opacity-0 translate-x-12 z-0'; // Default hidden
-                            if (index === activeIndex) positionClass = 'opacity-100 translate-x-0 z-20'; // Active
+                            let positionClass = 'opacity-0 z-0 pointer-events-none'; 
+                            if (index === activeIndex) positionClass = 'opacity-100 z-20 pointer-events-auto'; 
                             
                             return (
                                 <div 
                                     key={profile.id} 
-                                    className={`absolute inset-0 transition-all duration-700 ease-out transform ${positionClass}`}
+                                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${positionClass}`}
                                 >
                                     <div className="absolute inset-0 bg-stone-900">
                                        <img 
                                            src={profile.heroImage} 
                                            alt={profile.fullName} 
-                                           className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
+                                           className="w-full h-full object-cover opacity-50"
                                        />
-                                       <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/60 to-transparent"></div>
+                                       <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/70 to-transparent"></div>
                                     </div>
                                     
                                     <div className="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-12 z-30">
-                                         <div className="bg-amber-600/90 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 backdrop-blur-sm shadow-lg">
-                                             אתר לדוגמה
-                                         </div>
-                                         <h3 className="text-3xl md:text-5xl font-serif-hebrew font-bold text-white mb-2 shadow-black drop-shadow-md">
+                                         <h3 className="text-2xl md:text-4xl font-serif-hebrew font-bold text-white mb-2 shadow-black drop-shadow-md">
                                              {profile.fullName}
                                          </h3>
-                                         <p className="text-stone-300 text-lg line-clamp-2 max-w-lg mb-8">
+                                         <p className="text-stone-300 text-base md:text-lg line-clamp-2 max-w-lg mb-6">
                                              {profile.shortDescription || profile.bio}
                                          </p>
                                          <button 
                                             onClick={() => onSelectProfile(profile.id)}
-                                            className="flex items-center gap-2 text-white border-b border-amber-500 pb-1 hover:text-amber-400 hover:border-amber-400 transition-colors"
+                                            className="flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm transition-colors border border-white/10"
                                          >
                                              <span>כניסה לאתר ההנצחה</span>
                                              <ArrowLeft size={16} />
@@ -208,13 +180,27 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
                             );
                       })}
                   </div>
+
+                  {/* Navigation Arrows */}
+                  <button 
+                      onClick={() => changeSlide('prev')}
+                      className="absolute top-1/2 -left-4 md:-left-12 -translate-y-1/2 w-10 h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-300 flex items-center justify-center transition-colors shadow-lg z-30"
+                  >
+                      <ChevronRight size={20} />
+                  </button>
+                  <button 
+                      onClick={() => changeSlide('next')}
+                      className="absolute top-1/2 -right-4 md:-right-12 -translate-y-1/2 w-10 h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-300 flex items-center justify-center transition-colors shadow-lg z-30"
+                  >
+                      <ChevronLeft size={20} />
+                  </button>
               </div>
 
           </div>
       </section>
 
       {/* Footer */}
-      <footer className="w-full p-6 border-t border-stone-900 bg-stone-950 text-center">
+      <footer className="w-full p-6 border-t border-stone-900 bg-stone-950 text-center mt-auto">
          <button 
            onClick={onShowPrivacy}
            className="text-xs text-stone-500 hover:text-stone-300 transition-colors"

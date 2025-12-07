@@ -367,11 +367,15 @@ export const getCurrentUserEmail = (): string | null => {
   return localStorage.getItem(CURRENT_USER_KEY);
 };
 
-export const sendVerificationCode = (email: string): string => {
+// --- Verification Logic ---
+export const sendVerificationCode = (email: string): void => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
-    console.log(`[SIMULATION] Verification code for ${email}: ${code}`);
+    
+    // Log ONLY to console (Simulating sending to email server)
+    // The user MUST check the console or their "email"
+    console.log(`%c[EMAIL SERVICE] Verification Code for ${email}: ${code}`, 'color: #f59e0b; font-weight: bold; font-size: 14px;');
+    
     activeVerificationCodes.set(email, code);
-    return code;
 }
 
 export const verifyCode = (email: string, code: string): boolean => {

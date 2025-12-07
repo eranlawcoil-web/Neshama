@@ -1,18 +1,16 @@
 import { GoogleGenAI } from "@google/genai";
 
 const getClient = () => {
-  // Safe access check to prevent "process is not defined" crash in browser
   let apiKey = '';
   try {
-    if (typeof process !== 'undefined' && process.env) {
-      apiKey = process.env.API_KEY || '';
-    }
+    // Direct access allows build tools (Vite/Webpack) to replace this with the string literal
+    apiKey = process.env.API_KEY || '';
   } catch (e) {
-    console.warn("Environment variables not accessible");
+    console.warn("API Key access failed", e);
   }
 
   if (!apiKey) {
-    console.warn("API_KEY is missing or environment not configured");
+    console.warn("API_KEY is missing. AI features will be disabled.");
     return null;
   }
   return new GoogleGenAI({ apiKey });

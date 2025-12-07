@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Mail, ArrowRight, Loader2, Check, X, RefreshCw } from 'lucide-react';
+import { Mail, ArrowRight, Loader2, Check, X, RefreshCw, Terminal } from 'lucide-react';
 import { verifyCode, sendVerificationCode } from '../services/mockBackend';
 
 interface AuthModalProps {
@@ -19,9 +19,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
   
   // Resend Timer State
   const [resendTimer, setResendTimer] = useState(0);
-
-  // State for simulated notification
-  const [simulatedNotification, setSimulatedNotification] = useState<{code: string, show: boolean}>({ code: '', show: false });
 
   // Handle countdown
   useEffect(() => {
@@ -45,15 +42,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
     // Simulate network delay
     setTimeout(() => {
         setLoading(false);
-        const generatedCode = sendVerificationCode(email);
+        // Call backend - this will log the code to CONSOLE but not return it here
+        sendVerificationCode(email);
+        
         setStep('code');
         setResendTimer(60); // Start 60s cooldown
-        
-        // Show simulated notification instead of alert
-        setSimulatedNotification({ code: generatedCode, show: true });
-        
-        // Auto hide notification after 15 seconds
-        setTimeout(() => setSimulatedNotification(prev => ({ ...prev, show: false })), 15000);
     }, 1500);
   };
 
@@ -65,7 +58,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
             onSuccess(email);
         } else {
             setLoading(false);
-            setError('קוד שגוי. אנא בדוק את הקוד שנשלח ונסה שנית.');
+            setError('קוד שגוי. אנא בדוק את הקוד שנשלח למייל ונסה שנית.');
         }
     }, 800);
   };
@@ -73,40 +66,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
   return (
     <div className="fixed inset-0 bg-stone-900/80 backdrop-blur-md z-[60] flex items-center justify-center p-4 animate-in fade-in duration-300">
       
-      {/* Simulated Email Notification - High Z-Index */}
-      {simulatedNotification.show && (
-          <div className="fixed top-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm z-[100] animate-in slide-in-from-top duration-700">
-              <div 
-                className="bg-stone-800 text-white p-4 rounded-2xl shadow-2xl border border-stone-600 flex items-start gap-4 cursor-pointer hover:bg-stone-700 transition-colors"
-                onClick={() => {
-                  setCode(simulatedNotification.code);
-                  setSimulatedNotification(prev => ({ ...prev, show: false }));
-                }}
-              >
-                  <div className="bg-amber-600 p-2 rounded-full mt-1 shrink-0">
-                      <Mail size={20} />
-                  </div>
-                  <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                          <h4 className="font-bold text-sm text-amber-500">הודעה חדשה (סימולציה)</h4>
-                      </div>
-                      <p className="text-sm text-stone-300 mt-1 font-bold">קוד האימות שלך הוא:</p>
-                      <p className="text-3xl font-mono font-bold text-white tracking-widest mt-1 bg-black/20 p-2 rounded text-center border border-white/10">{simulatedNotification.code}</p>
-                      <p className="text-[10px] text-stone-500 mt-2 italic">* לחץ כאן להעתקת הקוד אוטומטית</p>
-                  </div>
-                  <button 
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setSimulatedNotification(prev => ({ ...prev, show: false }));
-                    }} 
-                    className="text-stone-400 hover:text-white p-1"
-                  >
-                      <X size={20} />
-                  </button>
-              </div>
-          </div>
-      )}
-
       <div className="bg-white rounded-3xl w-full max-w-md p-8 relative shadow-2xl overflow-hidden z-[65]">
         <button onClick={onCancel} className="absolute top-4 left-4 text-gray-400 hover:text-gray-800 transition-colors">✕</button>
         
@@ -148,9 +107,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
         ) : (
             <form onSubmit={handleVerify} className="space-y-4 animate-in slide-in-from-right duration-300">
                  <div className="text-center mb-4">
-                    <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-900 px-4 py-2 rounded-lg text-sm font-medium border border-amber-100">
-                        <Mail size={16}/>
-                        <span>קוד נשלח לכתובת: <span className="font-bold dir-ltr">{email}</span></span>
+                    <div className="inline-flex flex-col items-center gap-2 bg-amber-50 text-amber-900 px-4 py-3 rounded-lg text-sm font-medium border border-amber-100">
+                        <div className="flex items-center gap-2">
+                            <Mail size={16}/>
+                            <span>קוד נשלח לכתובת: <span className="font-bold dir-ltr">{email}</span></span>
+                        </div>
+                        <div className="text-[10px] text-stone-500 opacity-75 flex items-center gap-1">
+                            <Terminal size={10} />
+                            (בדמו זה: בדוק את ה-Console בדפדפן - F12)
+                        </div>
                     </div>
                  </div>
                  
