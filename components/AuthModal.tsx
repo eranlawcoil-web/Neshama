@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { Mail, ArrowRight, Loader2, Check, X, RefreshCw, Terminal } from 'lucide-react';
 import { verifyCode, sendVerificationCode } from '../services/mockBackend';
@@ -42,7 +41,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
     // Simulate network delay
     setTimeout(() => {
         setLoading(false);
-        // Call backend - this will log the code to CONSOLE but not return it here
+        // Backend handles sending (EmailJS or Console Log for demo)
         sendVerificationCode(email);
         
         setStep('code');
@@ -107,14 +106,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onCancel, isSavingDraf
         ) : (
             <form onSubmit={handleVerify} className="space-y-4 animate-in slide-in-from-right duration-300">
                  <div className="text-center mb-4">
-                    <div className="inline-flex flex-col items-center gap-2 bg-amber-50 text-amber-900 px-4 py-3 rounded-lg text-sm font-medium border border-amber-100">
+                    <div className="inline-flex flex-col items-center gap-2 bg-amber-50 text-amber-900 px-4 py-3 rounded-lg text-sm font-medium border border-amber-100 w-full">
                         <div className="flex items-center gap-2">
                             <Mail size={16}/>
                             <span>קוד נשלח לכתובת: <span className="font-bold dir-ltr">{email}</span></span>
-                        </div>
-                        <div className="text-[10px] text-stone-500 opacity-75 flex items-center gap-1">
-                            <Terminal size={10} />
-                            (בדמו זה: בדוק את ה-Console בדפדפן - F12)
                         </div>
                     </div>
                  </div>

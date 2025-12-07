@@ -50,7 +50,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
     <div className="min-h-screen bg-stone-950 text-white font-sans flex flex-col">
       
       {/* Navbar - Absolute over Hero */}
-      <nav className="absolute top-0 left-0 right-0 z-50 flex flex-col md:flex-row justify-between items-center p-6 md:px-12 gap-4 bg-gradient-to-b from-black/60 to-transparent">
+      <nav className="absolute top-0 left-0 right-0 z-50 flex flex-col md:flex-row justify-between items-center p-6 md:px-12 gap-4 bg-gradient-to-b from-black/80 to-transparent">
          <div className="flex items-center gap-6">
              <div 
                className="text-2xl font-serif-hebrew font-bold text-amber-500 tracking-wide cursor-pointer hover:text-amber-400 transition-colors"
@@ -90,16 +90,16 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
          </div>
       </nav>
 
-      {/* --- SECTION 1: HERO / INTRO (Half Height) --- */}
-      <header className="relative h-[60vh] flex items-center justify-center overflow-hidden border-b border-white/5">
+      {/* --- SECTION 1: HERO / INTRO --- */}
+      <header className="relative h-[65vh] min-h-[500px] flex items-center justify-center overflow-hidden border-b border-white/5">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
              <img 
                src="https://images.unsplash.com/photo-1499578124509-1611b77778c8?q=80&w=1920&auto=format&fit=crop" 
                alt="Background" 
-               className="w-full h-full object-cover opacity-50"
+               className="w-full h-full object-cover opacity-40"
              />
-             <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/80 to-black/40"></div>
+             <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/60 to-black/60"></div>
           </div>
 
           <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -109,91 +109,132 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
                  </span>
              </div>
              
-             <h1 className="text-4xl md:text-6xl font-serif-hebrew font-bold mb-6 leading-tight text-white drop-shadow-2xl">
+             <h1 className="text-5xl md:text-7xl font-serif-hebrew font-bold mb-6 leading-tight text-white drop-shadow-2xl">
                 זהו אתר ליצירת אתרי הנצחה לאהובים
              </h1>
              
-             <p className="text-lg md:text-2xl text-stone-300 mb-10 font-light leading-relaxed max-w-3xl mx-auto">
+             <p className="text-xl md:text-3xl text-stone-300 mb-10 font-light leading-relaxed max-w-4xl mx-auto">
                 בקלות ובפשטות, בשיתוף עם משפחה וחברים, <br className="hidden md:block"/>
                 יוצרים יחד <span className="text-amber-400 font-bold">עץ חיים</span> להנצחת יקירנו.
              </p>
 
-             <div className="flex flex-col md:flex-row justify-center gap-4">
+             <div className="flex flex-col md:flex-row justify-center gap-6">
                 <button 
                     onClick={onCreate} 
-                    className="group flex items-center justify-center gap-3 bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-full text-lg font-bold transition-all hover:scale-105 shadow-[0_0_30px_-10px_rgba(217,119,6,0.6)]"
+                    className="group flex items-center justify-center gap-3 bg-amber-600 hover:bg-amber-500 text-white px-10 py-5 rounded-full text-xl font-bold transition-all hover:scale-105 shadow-[0_0_40px_-10px_rgba(217,119,6,0.6)]"
                 >
-                    <Plus size={24} />
+                    <Plus size={28} />
                     <span>צור אתר לזכר יקירך</span>
                 </button>
              </div>
           </div>
       </header>
 
-      {/* --- SECTION 2: COMMUNITY SHOWCASE (Compact Slider) --- */}
-      <section className="bg-stone-950 py-12 px-4 md:px-12 flex-1 flex flex-col items-center justify-start relative">
-          <div className="max-w-4xl mx-auto w-full flex flex-col gap-8 items-center">
+      {/* --- SECTION 2: COMMUNITY SHOWCASE (Side-by-Side Layout) --- */}
+      <section className="bg-stone-950 py-20 px-4 md:px-12 flex-1 relative overflow-hidden">
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-stone-900/50 to-transparent pointer-events-none"></div>
+
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
               
-              <div className="text-center">
-                  <h2 className="text-2xl md:text-3xl font-serif-hebrew font-bold text-stone-100 mb-2 flex items-center justify-center gap-2">
-                      <Users className="text-amber-500" size={24}/> דוגמאות מהקהילה
-                  </h2>
+              {/* Right Side: Text & Navigation */}
+              <div className="md:col-span-5 flex flex-col justify-center space-y-8 z-10 text-right">
+                  <div>
+                      <h2 className="text-3xl md:text-4xl font-serif-hebrew font-bold text-white mb-4 flex items-center gap-3">
+                          <Users className="text-amber-500" size={32}/> 
+                          דוגמאות מהקהילה
+                      </h2>
+                      <p className="text-stone-400 text-lg leading-relaxed">
+                          אלפי משפחות בחרו להנציח את יקיריהם באמצעות המערכת שלנו.
+                          <br/>
+                          הנה הצצה לכמה מהסיפורים המרגשים שנבנו כאן.
+                      </p>
+                  </div>
+
+                  {/* Indicators & Arrows */}
+                  <div className="flex items-center gap-6">
+                       <div className="flex gap-2">
+                           <button 
+                               onClick={() => changeSlide('prev')}
+                               className="w-12 h-12 rounded-full border border-stone-700 hover:bg-stone-800 text-stone-300 flex items-center justify-center transition-colors"
+                           >
+                               <ChevronRight size={24} />
+                           </button>
+                           <button 
+                               onClick={() => changeSlide('next')}
+                               className="w-12 h-12 rounded-full border border-stone-700 hover:bg-amber-600 hover:border-amber-600 hover:text-white text-stone-300 flex items-center justify-center transition-all shadow-lg"
+                           >
+                               <ChevronLeft size={24} />
+                           </button>
+                       </div>
+                       
+                       <div className="flex gap-1.5">
+                           {displayProfiles.map((_, idx) => (
+                               <div 
+                                 key={idx} 
+                                 className={`h-1.5 rounded-full transition-all duration-300 ${idx === activeIndex ? 'w-8 bg-amber-500' : 'w-2 bg-stone-800'}`} 
+                               />
+                           ))}
+                       </div>
+                  </div>
+
+                  {currentProfile && (
+                      <div className="hidden md:block animate-in fade-in duration-500">
+                          <button 
+                             onClick={() => onSelectProfile(currentProfile.id)}
+                             className="text-amber-400 hover:text-amber-300 text-lg font-bold flex items-center gap-2 group transition-colors"
+                          >
+                              <span>צפה באתר ההנצחה של {currentProfile.fullName}</span>
+                              <ArrowLeft size={20} className="transform group-hover:-translate-x-2 transition-transform"/>
+                          </button>
+                      </div>
+                  )}
               </div>
 
-              {/* Slider Side - Smaller & Compact */}
-              <div className="w-full relative group">
-                  <div className="relative w-full aspect-video md:aspect-[2.5/1] bg-stone-900 rounded-2xl overflow-hidden shadow-2xl border border-stone-800">
+              {/* Left Side: Slider Visual */}
+              <div className="md:col-span-7 w-full h-[400px] md:h-[500px] relative">
+                  <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-stone-800 bg-stone-900">
                       {displayProfiles.map((profile, index) => {
-                            let positionClass = 'opacity-0 z-0 pointer-events-none'; 
-                            if (index === activeIndex) positionClass = 'opacity-100 z-20 pointer-events-auto'; 
+                            let positionClass = 'opacity-0 z-0 pointer-events-none translate-x-12'; 
+                            if (index === activeIndex) positionClass = 'opacity-100 z-20 pointer-events-auto translate-x-0'; 
                             
                             return (
                                 <div 
                                     key={profile.id} 
-                                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${positionClass}`}
+                                    className={`absolute inset-0 transition-all duration-700 ease-out ${positionClass}`}
                                 >
                                     <div className="absolute inset-0 bg-stone-900">
                                        <img 
                                            src={profile.heroImage} 
                                            alt={profile.fullName} 
-                                           className="w-full h-full object-cover opacity-50"
+                                           className="w-full h-full object-cover opacity-60"
                                        />
-                                       <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/70 to-transparent"></div>
+                                       <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent"></div>
+                                       <div className="absolute inset-0 bg-gradient-to-r from-stone-950/50 to-transparent"></div>
                                     </div>
                                     
-                                    <div className="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-12 z-30">
-                                         <h3 className="text-2xl md:text-4xl font-serif-hebrew font-bold text-white mb-2 shadow-black drop-shadow-md">
+                                    <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 z-30 flex flex-col items-start text-right">
+                                         <h3 className="text-4xl md:text-5xl font-serif-hebrew font-bold text-white mb-3 shadow-black drop-shadow-lg">
                                              {profile.fullName}
                                          </h3>
-                                         <p className="text-stone-300 text-base md:text-lg line-clamp-2 max-w-lg mb-6">
+                                         <p className="text-stone-200 text-lg md:text-xl line-clamp-2 max-w-xl mb-6 font-light">
                                              {profile.shortDescription || profile.bio}
                                          </p>
-                                         <button 
-                                            onClick={() => onSelectProfile(profile.id)}
-                                            className="flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm transition-colors border border-white/10"
-                                         >
-                                             <span>כניסה לאתר ההנצחה</span>
-                                             <ArrowLeft size={16} />
-                                         </button>
+                                         
+                                         {/* Mobile CTA */}
+                                         <div className="md:hidden">
+                                            <button 
+                                                onClick={() => onSelectProfile(profile.id)}
+                                                className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-2 rounded-full text-sm font-bold"
+                                            >
+                                                כניסה לאתר
+                                            </button>
+                                         </div>
                                     </div>
                                 </div>
                             );
                       })}
                   </div>
-
-                  {/* Navigation Arrows */}
-                  <button 
-                      onClick={() => changeSlide('prev')}
-                      className="absolute top-1/2 -left-4 md:-left-12 -translate-y-1/2 w-10 h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-300 flex items-center justify-center transition-colors shadow-lg z-30"
-                  >
-                      <ChevronRight size={20} />
-                  </button>
-                  <button 
-                      onClick={() => changeSlide('next')}
-                      className="absolute top-1/2 -right-4 md:-right-12 -translate-y-1/2 w-10 h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-300 flex items-center justify-center transition-colors shadow-lg z-30"
-                  >
-                      <ChevronLeft size={20} />
-                  </button>
               </div>
 
           </div>
