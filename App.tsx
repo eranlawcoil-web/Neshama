@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { DeceasedProfile, Memory, SystemConfig } from './types';
 import * as mockBackend from './services/mockBackend';
@@ -294,7 +293,7 @@ const App: React.FC = () => {
       );
   }
 
-  if (!profile) return <div className="h-screen flex items-center justify-center bg-stone-900 text-amber-500">טוען נתונים...</div>;
+  if (!profile) return <div className="h-screen flex items-center justify-center bg-stone-50 text-amber-600">טוען נתונים...</div>;
 
   // Admin logic: 
   const isAdmin = (currentUser && currentUser === profile.email) || (profile.isDraft === true && !profile.email);
@@ -309,7 +308,7 @@ const App: React.FC = () => {
         className={`fixed top-0 w-full z-50 border-b transition-all duration-300 group
             ${isScrolled 
                 ? 'bg-white/95 backdrop-blur-md shadow-md border-stone-200 py-3 md:py-4' 
-                : 'bg-white/10 backdrop-blur-md border-white/10 py-4 hover:bg-white/95'
+                : 'bg-white/30 backdrop-blur-md border-white/20 py-4 hover:bg-white/95'
             }
         `}
       >
@@ -318,7 +317,7 @@ const App: React.FC = () => {
                 {/* Back to Home Button */}
                 <button 
                     onClick={() => setView('landing')} 
-                    className={`flex items-center gap-2 transition-colors px-4 py-2 rounded-full hover:bg-white shrink-0 ${isScrolled ? 'text-stone-600 bg-stone-100' : 'text-stone-600 bg-white/50'}`}
+                    className={`flex items-center gap-2 transition-colors px-4 py-2 rounded-full hover:bg-white shrink-0 ${isScrolled ? 'text-stone-600 bg-stone-100' : 'text-stone-700 bg-white/60 hover:text-stone-900'}`}
                 >
                     <ArrowRight size={20} />
                     <span className="font-bold text-base hidden xl:inline">חזרה ל{projectName}</span>
@@ -355,7 +354,7 @@ const App: React.FC = () => {
                 )}
 
                 {!isScrolled && (
-                    <div className="hidden md:block text-2xl font-bold font-serif-hebrew text-amber-600 opacity-80 absolute left-1/2 transform -translate-x-1/2">
+                    <div className="hidden md:block text-2xl font-bold font-serif-hebrew text-amber-600 opacity-90 absolute left-1/2 transform -translate-x-1/2 drop-shadow-sm bg-white/40 px-4 py-1 rounded-full backdrop-blur-sm">
                         {profile.fullName}
                     </div>
                 )}
@@ -370,14 +369,14 @@ const App: React.FC = () => {
             <div className="flex items-center gap-3 shrink-0">
             {currentUser ? (
                 <div className="flex items-center gap-3">
-                    <span className={`text-xs hidden md:inline ${isScrolled ? 'text-stone-500' : 'text-stone-300 group-hover:text-stone-500'}`}>{currentUser}</span>
+                    <span className={`text-xs hidden md:inline ${isScrolled ? 'text-stone-500' : 'text-stone-600 font-medium'}`}>{currentUser}</span>
                     <button 
                         onClick={() => {
                             mockBackend.logoutMock();
                             setCurrentUser(null);
                             setView('landing');
                         }}
-                        className="flex items-center gap-2 text-sm text-stone-600 hover:text-red-500 transition-colors"
+                        className="flex items-center gap-2 text-sm text-stone-600 hover:text-red-500 transition-colors bg-white/50 p-2 rounded-lg"
                     >
                         <LogOut size={18} />
                         <span className="hidden md:inline">התנתק</span>
@@ -401,7 +400,7 @@ const App: React.FC = () => {
             {!currentUser && (
                 <button 
                     onClick={handleSaveRequest}
-                    className="bg-amber-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-amber-700 transition-colors"
+                    className="bg-amber-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-sm"
                 >
                     שמור טיוטה
                 </button>
@@ -412,14 +411,14 @@ const App: React.FC = () => {
 
       {/* Trial / Payment Banner */}
       {isAdmin && !profile.isPublic && (
-          <div className="fixed bottom-0 left-0 right-0 z-[60] bg-stone-900 text-white p-4 flex flex-col md:flex-row items-center justify-between gap-4 border-t-4 border-amber-500 shadow-2xl animate-in slide-in-from-bottom-full">
+          <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white text-stone-900 p-4 flex flex-col md:flex-row items-center justify-between gap-4 border-t-4 border-amber-500 shadow-2xl animate-in slide-in-from-bottom-full">
               <div className="flex items-center gap-3">
-                  <div className="bg-amber-500 p-2 rounded-full text-stone-900">
+                  <div className="bg-amber-100 p-2 rounded-full text-amber-600">
                       <ShieldAlert size={24} />
                   </div>
                   <div>
-                      <h3 className="font-bold text-lg">מצב טיוטה (פרטי)</h3>
-                      <p className="text-stone-400 text-sm">האתר אינו גלוי לציבור. {profile.accountType === 'free' ? 'לחץ על הכפתור כדי לפרסם אותו.' : 'כדי לשתף אותו, יש להפעיל מנוי.'}</p>
+                      <h3 className="font-bold text-lg text-stone-800">מצב טיוטה (פרטי)</h3>
+                      <p className="text-stone-500 text-sm">האתר אינו גלוי לציבור. {profile.accountType === 'free' ? 'לחץ על הכפתור כדי לפרסם אותו.' : 'כדי לשתף אותו, יש להפעיל מנוי.'}</p>
                   </div>
               </div>
               
@@ -441,13 +440,13 @@ const App: React.FC = () => {
                             setShowPaymentModal(true);
                         }
                     }}
-                    className="bg-amber-500 hover:bg-amber-400 text-stone-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
+                    className="bg-amber-500 hover:bg-amber-400 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
                   >
                       <ShoppingCart size={20}/>
                       <span>רכוש מנוי והפץ</span>
-                      <div className="flex items-center gap-1 bg-stone-900/10 px-2 rounded-full">
+                      <div className="flex items-center gap-1 bg-white/20 px-2 rounded-full">
                           {originalPrice > currentPrice && (
-                            <span className="text-stone-700 line-through text-xs decoration-red-500">₪{originalPrice}</span>
+                            <span className="text-white/80 line-through text-xs decoration-white">₪{originalPrice}</span>
                           )}
                           <span>₪{currentPrice}/שנה</span>
                       </div>
@@ -468,7 +467,7 @@ const App: React.FC = () => {
       />
 
       {/* Main Content - Timeline */}
-      <main className="pb-8 relative flex-grow">
+      <main className="pb-8 relative flex-grow bg-stone-50">
         <div className="text-center mt-12 mb-8 px-4">
            <h2 className="text-3xl font-serif-hebrew text-stone-800">{projectName}</h2>
            <p className="text-stone-500 mt-2">מסע בזמן דרך רגעים, תמונות וזכרונות</p>
@@ -489,10 +488,10 @@ const App: React.FC = () => {
       )}
       
       {/* App Footer */}
-      <footer className="bg-stone-900 text-stone-400 py-6 text-center text-sm border-t border-stone-800 mt-auto">
+      <footer className="bg-stone-100 text-stone-500 py-6 text-center text-sm border-t border-stone-200 mt-auto">
           <button 
              onClick={() => setShowPrivacyModal(true)}
-             className="hover:text-white transition-colors underline decoration-stone-700 hover:decoration-white"
+             className="hover:text-stone-800 transition-colors underline decoration-stone-300 hover:decoration-stone-800"
           >
              תנאי שימוש ומדיניות פרטיות
           </button>
