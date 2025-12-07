@@ -1,10 +1,13 @@
+
 import { GoogleGenAI } from "@google/genai";
 
 const getClient = () => {
   let apiKey = '';
   try {
-    // Direct access allows build tools (Vite/Webpack) to replace this with the string literal
-    apiKey = process.env.API_KEY || '';
+    // Safer access to process.env that won't crash browser if process is undefined
+    if (typeof process !== 'undefined' && process.env) {
+        apiKey = process.env.API_KEY || '';
+    }
   } catch (e) {
     console.warn("API Key access failed", e);
   }

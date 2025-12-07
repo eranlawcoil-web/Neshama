@@ -1,8 +1,8 @@
 
-
 import { DeceasedProfile, Memory, VisitLog, SystemConfig } from '../types';
+import { sendRealEmail } from './emailService';
 
-const STORAGE_KEY = 'neshama_profiles_v9'; // Bumped version to ensure new data loads
+const STORAGE_KEY = 'neshama_profiles_v9';
 const STORAGE_VISITS_KEY = 'neshama_visits_v1';
 const STORAGE_CONFIG_KEY = 'neshama_config_v1';
 const CURRENT_USER_KEY = 'neshama_current_user';
@@ -35,7 +35,6 @@ export const getSystemConfig = (): SystemConfig => {
         const raw = localStorage.getItem(STORAGE_CONFIG_KEY);
         if (raw) {
             const parsed = JSON.parse(raw);
-            // Ensure backwards compatibility with defaults
             return {
                 superAdminEmails: parsed.superAdminEmails || [DEFAULT_SUPER_ADMIN],
                 projectName: parsed.projectName || 'אתר הנצחה',
@@ -49,8 +48,6 @@ export const getSystemConfig = (): SystemConfig => {
     } catch (e) {
         console.error("Error reading config", e);
     }
-    
-    // Default Config
     return {
         superAdminEmails: [DEFAULT_SUPER_ADMIN],
         projectName: 'אתר הנצחה',
@@ -75,7 +72,6 @@ export const isSuperAdmin = (email: string): boolean => {
 const initData = () => {
   const existing = localStorage.getItem(STORAGE_KEY);
   if (!existing) {
-    
     // --- Profile 1: Nature Lover ---
     const daniel: DeceasedProfile = {
       id: 'demo-1',
@@ -193,12 +189,10 @@ export const getProfiles = (): DeceasedProfile[] => {
     const data = localStorage.getItem(STORAGE_KEY);
     const profiles: DeceasedProfile[] = data ? JSON.parse(data) : [];
     
-    // Automatically Append Z"L to names on retrieval
     return profiles.map(p => ({
         ...p,
         fullName: formatNameWithZL(p.fullName)
     }));
-
   } catch (e) {
     console.error("Failed to parse profiles", e);
     return [];
@@ -207,19 +201,12 @@ export const getProfiles = (): DeceasedProfile[] => {
 
 export const getCommunityProfiles = (): DeceasedProfile[] => {
     const allProfiles = getProfiles().filter(p => p.isPublic);
-    
-    // 1. Get manually pinned profiles
     const pinned = allProfiles.filter(p => p.showInCommunity);
-    
-    // 2. Get recent profiles (sorted by update or creation), excluding already pinned ones to avoid duplicates
     const recent = allProfiles
         .filter(p => !pinned.find(pin => pin.id === p.id))
         .sort((a, b) => (b.lastUpdated || 0) - (a.lastUpdated || 0));
-        
-    // 3. Combine: Pinned first, then fill remainder with recent to ensure at least 5 if possible
-    const combined = [...pinned, ...recent];
     
-    // Return at least the top 5 (or all if less than 5)
+    const combined = [...pinned, ...recent];
     return combined.slice(0, Math.max(5, combined.length));
 };
 
@@ -228,15 +215,12 @@ export const getProfileById = (id: string): DeceasedProfile | undefined => {
     return profiles.find(p => p.id === id);
 }
 
-// Automatically adds or updates Birth and Death milestones based on profile dates
 const syncMilestones = (profile: DeceasedProfile): DeceasedProfile => {
     let updatedMemories = [...(profile.memories || [])];
 
-    // 1. Sync Birth
     if (profile.birthDate) {
         const birthYear = parseInt(profile.birthDate.split('-')[0]);
         const existingBirth = updatedMemories.find(m => m.tags?.includes('birth'));
-        
         if (existingBirth) {
             existingBirth.year = birthYear;
             existingBirth.content = `נולד/ה בתאריך ${profile.birthDate.split('-').reverse().join('.')}. תחילתו של מסע החיים.`;
@@ -253,11 +237,9 @@ const syncMilestones = (profile: DeceasedProfile): DeceasedProfile => {
         }
     }
 
-    // 2. Sync Death
     if (profile.deathDate) {
         const deathYear = parseInt(profile.deathDate.split('-')[0]);
         const existingDeath = updatedMemories.find(m => m.tags?.includes('death'));
-        
         if (existingDeath) {
             existingDeath.year = deathYear;
         } else {
@@ -279,10 +261,8 @@ const syncMilestones = (profile: DeceasedProfile): DeceasedProfile => {
 export const saveProfile = (profile: DeceasedProfile): DeceasedProfile | null => {
   try {
     const profiles = getProfiles();
-    
     const currentUser = getCurrentUserEmail() || 'Admin';
     
-    // Strip Z"L
     const profileToSave = {
         ...profile,
         fullName: cleanNameForSave(profile.fullName),
@@ -290,20 +270,17 @@ export const saveProfile = (profile: DeceasedProfile): DeceasedProfile | null =>
         lastUpdatedBy: currentUser
     };
     
-    // Auto-sync milestones
     const syncedProfile = syncMilestones(profileToSave);
-
     const index = profiles.findIndex(p => p.id === syncedProfile.id);
     
     if (index >= 0) {
         profiles[index] = syncedProfile;
-        logVisit(syncedProfile, currentUser, 'update'); // Log update action
+        logVisit(syncedProfile, currentUser, 'update');
     } else {
         profiles.push(syncedProfile);
-        logVisit(syncedProfile, currentUser, 'create'); // Log create action
+        logVisit(syncedProfile, currentUser, 'create');
     }
     
-    // Prepare for storage
     const storageReadyProfiles = profiles.map(p => ({
         ...p,
         fullName: cleanNameForSave(p.fullName)
@@ -367,15 +344,28 @@ export const getCurrentUserEmail = (): string | null => {
   return localStorage.getItem(CURRENT_USER_KEY);
 };
 
-// --- Verification Logic ---
-export const sendVerificationCode = (email: string): void => {
+// --- Verification Logic with Notification ---
+export const sendVerificationCode = async (email: string): Promise<void> => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
-    
-    // Log ONLY to console (Simulating sending to email server)
-    // The user MUST check the console or their "email"
-    console.log(`%c[EMAIL SERVICE] Verification Code for ${email}: ${code}`, 'color: #f59e0b; font-weight: bold; font-size: 14px;');
-    
     activeVerificationCodes.set(email, code);
+
+    // Try sending real email
+    const emailSent = await sendRealEmail(email, code);
+    
+    // Dispatch event to show the code in the UI (NotificationToast)
+    // This ensures the user sees the code even if they don't have an email server configured yet.
+    const message = emailSent 
+        ? `קוד אימות נשלח לכתובת ${email}`
+        : `מצב דמו: הקוד שלך הוא ${code}`;
+
+    window.dispatchEvent(new CustomEvent('show-toast', { 
+        detail: { 
+            title: 'אימות חשבון', 
+            message: message, 
+            type: 'info',
+            duration: 10000 // Show for 10 seconds so they can copy it
+        } 
+    }));
 }
 
 export const verifyCode = (email: string, code: string): boolean => {
@@ -401,7 +391,7 @@ export const logVisit = (profile: DeceasedProfile, visitorEmail?: string, action
             actionType
         };
         visits.unshift(newVisit);
-        if(visits.length > 2000) visits.length = 2000; // Keep last 2000 events
+        if(visits.length > 2000) visits.length = 2000;
         localStorage.setItem(STORAGE_VISITS_KEY, JSON.stringify(visits));
     } catch (e) {
         console.error("Failed to log visit", e);

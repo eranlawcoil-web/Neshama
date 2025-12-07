@@ -14,6 +14,7 @@ import SuperAdminDashboard from './components/SuperAdminDashboard';
 import ProfileSearch from './components/ProfileSearch';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 import QRCodeModal from './components/QRCodeModal';
+import NotificationToast from './components/NotificationToast'; // Imported Toast
 import { LogIn, LogOut, Plus, ShieldAlert, ShoppingCart, Eye, ArrowRight, Settings, Gift, CheckCircle, Flame } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -250,8 +251,12 @@ const App: React.FC = () => {
 
   const projectName = systemConfig?.projectName || 'אתר הנצחה';
 
-  if (view === 'superAdmin') {
-      return (
+  return (
+    <div className="font-sans text-stone-900 bg-stone-50 min-h-screen">
+       {/* Global Notification Toast */}
+       <NotificationToast />
+
+       {view === 'superAdmin' ? (
           <>
             <SuperAdminDashboard 
                 onLogout={() => {
@@ -263,14 +268,9 @@ const App: React.FC = () => {
             />
             {showPrivacyModal && <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />}
           </>
-      );
-  }
-
-  if (view === 'landing') {
-      return (
+       ) : view === 'landing' ? (
           <>
             <Landing 
-                // Pass filtered/sorted community profiles
                 profiles={mockBackend.getCommunityProfiles()}
                 projectName={projectName}
                 onCreate={handleStartCreate}
@@ -290,272 +290,253 @@ const App: React.FC = () => {
             )}
             {showPrivacyModal && <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />}
           </>
-      );
-  }
+       ) : profile ? (
+          <div className="min-h-screen bg-stone-50 text-stone-900 font-sans flex flex-col">
+            
+            {/* Navbar - Sticky & Dynamic */}
+            <nav 
+                className={`fixed top-0 w-full z-50 border-b transition-all duration-300 group
+                    ${isScrolled 
+                        ? 'bg-white/95 backdrop-blur-md shadow-md border-stone-200 py-3 md:py-4' 
+                        : 'bg-white/30 backdrop-blur-md border-white/20 py-4 hover:bg-white/95'
+                    }
+                `}
+            >
+                <div className="px-6 flex justify-between items-center w-full">
+                    <div className="flex items-center gap-6 flex-1">
+                        <button 
+                            onClick={() => setView('landing')} 
+                            className={`flex items-center gap-2 transition-colors px-4 py-2 rounded-full hover:bg-white shrink-0 ${isScrolled ? 'text-stone-600 bg-stone-100' : 'text-stone-700 bg-white/60 hover:text-stone-900'}`}
+                        >
+                            <ArrowRight size={20} />
+                            <span className="font-bold text-base hidden xl:inline">חזרה ל{projectName}</span>
+                        </button>
 
-  if (!profile) return <div className="h-screen flex items-center justify-center bg-stone-50 text-amber-600">טוען נתונים...</div>;
+                        <div className={`flex items-center gap-4 transition-all duration-500 flex-1 ${isScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 hidden'}`}>
+                            <img 
+                                src={profile.heroImage} 
+                                alt={profile.fullName} 
+                                className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-amber-500 shadow-sm shrink-0"
+                            />
+                            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-6">
+                                <span className="font-serif-hebrew font-bold text-stone-900 text-xl md:text-3xl leading-none whitespace-nowrap">{profile.fullName}</span>
+                                {profile.isPublic && (
+                                    <button 
+                                        onClick={() => setIsCandleLit(true)}
+                                        className="flex items-center gap-2 bg-stone-100 hover:bg-amber-50 px-3 py-1 rounded-full transition-colors w-fit"
+                                    >
+                                        <Flame size={18} className={isCandleLit ? 'text-amber-500 fill-amber-500 animate-pulse' : 'text-stone-400'} />
+                                        <span className={`text-sm font-bold ${isCandleLit ? 'text-amber-600' : 'text-stone-500'}`}>
+                                            {isCandleLit ? 'נר דולק' : 'הדלק נר'}
+                                        </span>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
 
-  // Admin logic: 
-  const isAdmin = (currentUser && currentUser === profile.email) || (profile.isDraft === true && !profile.email);
-  const currentPrice = systemConfig?.pricing.currentPrice || 150;
-  const originalPrice = systemConfig?.pricing.originalPrice || 300;
+                        {!isScrolled && (
+                            <div className="hidden lg:flex items-center gap-4">
+                                <ProfileSearch onSelectProfile={handleSelectProfile} variant="light" />
+                            </div>
+                        )}
 
-  return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans flex flex-col">
-      
-      {/* Navbar - Sticky & Dynamic */}
-      <nav 
-        className={`fixed top-0 w-full z-50 border-b transition-all duration-300 group
-            ${isScrolled 
-                ? 'bg-white/95 backdrop-blur-md shadow-md border-stone-200 py-3 md:py-4' 
-                : 'bg-white/30 backdrop-blur-md border-white/20 py-4 hover:bg-white/95'
-            }
-        `}
-      >
-        <div className="px-6 flex justify-between items-center w-full">
-            <div className="flex items-center gap-6 flex-1">
-                {/* Back to Home Button */}
-                <button 
-                    onClick={() => setView('landing')} 
-                    className={`flex items-center gap-2 transition-colors px-4 py-2 rounded-full hover:bg-white shrink-0 ${isScrolled ? 'text-stone-600 bg-stone-100' : 'text-stone-700 bg-white/60 hover:text-stone-900'}`}
-                >
-                    <ArrowRight size={20} />
-                    <span className="font-bold text-base hidden xl:inline">חזרה ל{projectName}</span>
-                </button>
-
-                {/* Sticky Profile Info - Slides in when scrolled */}
-                <div className={`flex items-center gap-4 transition-all duration-500 flex-1 ${isScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 hidden'}`}>
-                    <img 
-                        src={profile.heroImage} 
-                        alt={profile.fullName} 
-                        className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-amber-500 shadow-sm shrink-0"
-                    />
-                    <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-6">
-                        <span className="font-serif-hebrew font-bold text-stone-900 text-xl md:text-3xl leading-none whitespace-nowrap">{profile.fullName}</span>
-                        
-                        {profile.isPublic && (
-                             <button 
-                                onClick={() => setIsCandleLit(true)}
-                                className="flex items-center gap-2 bg-stone-100 hover:bg-amber-50 px-3 py-1 rounded-full transition-colors w-fit"
-                             >
-                                <Flame size={18} className={isCandleLit ? 'text-amber-500 fill-amber-500 animate-pulse' : 'text-stone-400'} />
-                                <span className={`text-sm font-bold ${isCandleLit ? 'text-amber-600' : 'text-stone-500'}`}>
-                                    {isCandleLit ? 'נר דולק' : 'הדלק נר'}
-                                </span>
-                             </button>
+                        {!profile.isPublic && (
+                            <span className="bg-stone-200 text-stone-600 text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1 shrink-0">
+                                <Eye size={12}/> טיוטה
+                            </span>
                         )}
                     </div>
-                </div>
+                
+                    <div className="flex items-center gap-3 shrink-0">
+                    {currentUser ? (
+                        <div className="flex items-center gap-3">
+                            <span className={`text-xs hidden md:inline ${isScrolled ? 'text-stone-500' : 'text-stone-600 font-medium'}`}>{currentUser}</span>
+                            <button 
+                                onClick={() => {
+                                    mockBackend.logoutMock();
+                                    setCurrentUser(null);
+                                    setView('landing');
+                                }}
+                                className="flex items-center gap-2 text-sm text-stone-600 hover:text-red-500 transition-colors bg-white/50 p-2 rounded-lg"
+                            >
+                                <LogOut size={18} />
+                                <span className="hidden md:inline">התנתק</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <button 
+                                onClick={() => {
+                                    setAuthMode('login');
+                                    setShowAuthModal(true);
+                                }}
+                                className="bg-stone-800 text-white text-xs md:text-sm px-3 py-2 rounded-lg hover:bg-black transition-colors flex items-center gap-2 shadow-lg"
+                            >
+                                <Settings size={14} />
+                                <span>ניהול {projectName}</span>
+                            </button>
+                        </div>
+                    )}
 
-                {!isScrolled && (
-                   <div className="hidden lg:flex items-center gap-4">
-                       <ProfileSearch onSelectProfile={handleSelectProfile} variant="light" />
-                   </div>
-                )}
-
-                {!isScrolled && (
-                    <div className="hidden md:block text-2xl font-bold font-serif-hebrew text-amber-600 opacity-90 absolute left-1/2 transform -translate-x-1/2 drop-shadow-sm bg-white/40 px-4 py-1 rounded-full backdrop-blur-sm">
-                        {profile.fullName}
+                    {!currentUser && (
+                        <button 
+                            onClick={handleSaveRequest}
+                            className="bg-amber-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-sm"
+                        >
+                            שמור טיוטה
+                        </button>
+                    )}
                     </div>
-                )}
-
-                {!profile.isPublic && (
-                    <span className="bg-stone-200 text-stone-600 text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1 shrink-0">
-                        <Eye size={12}/> טיוטה
-                    </span>
-                )}
-            </div>
-        
-            <div className="flex items-center gap-3 shrink-0">
-            {currentUser ? (
-                <div className="flex items-center gap-3">
-                    <span className={`text-xs hidden md:inline ${isScrolled ? 'text-stone-500' : 'text-stone-600 font-medium'}`}>{currentUser}</span>
-                    <button 
-                        onClick={() => {
-                            mockBackend.logoutMock();
-                            setCurrentUser(null);
-                            setView('landing');
-                        }}
-                        className="flex items-center gap-2 text-sm text-stone-600 hover:text-red-500 transition-colors bg-white/50 p-2 rounded-lg"
-                    >
-                        <LogOut size={18} />
-                        <span className="hidden md:inline">התנתק</span>
-                    </button>
                 </div>
-            ) : (
-                <div className="flex items-center gap-2">
-                    <button 
-                        onClick={() => {
-                            setAuthMode('login');
-                            setShowAuthModal(true);
-                        }}
-                        className="bg-stone-800 text-white text-xs md:text-sm px-3 py-2 rounded-lg hover:bg-black transition-colors flex items-center gap-2 shadow-lg"
-                    >
-                        <Settings size={14} />
-                        <span>ניהול {projectName}</span>
-                    </button>
+            </nav>
+
+            {/* Trial / Payment Banner */}
+            {((currentUser && currentUser === profile.email) || (profile.isDraft && !profile.email)) && !profile.isPublic && (
+                <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white text-stone-900 p-4 flex flex-col md:flex-row items-center justify-between gap-4 border-t-4 border-amber-500 shadow-2xl animate-in slide-in-from-bottom-full">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-amber-100 p-2 rounded-full text-amber-600">
+                            <ShieldAlert size={24} />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg text-stone-800">מצב טיוטה (פרטי)</h3>
+                            <p className="text-stone-500 text-sm">האתר אינו גלוי לציבור. {profile.accountType === 'free' ? 'לחץ על הכפתור כדי לפרסם אותו.' : 'כדי לשתף אותו, יש להפעיל מנוי.'}</p>
+                        </div>
+                    </div>
+                    
+                    {profile.accountType === 'free' ? (
+                        <button 
+                            onClick={handleFreePublish}
+                            className="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
+                        >
+                            <CheckCircle size={20}/>
+                            פרסם אתר (ללא עלות)
+                        </button>
+                    ) : (
+                        <button 
+                            onClick={() => {
+                                if(!currentUser) {
+                                    setAuthMode('save');
+                                    setShowAuthModal(true);
+                                } else {
+                                    setShowPaymentModal(true);
+                                }
+                            }}
+                            className="bg-amber-500 hover:bg-amber-400 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
+                        >
+                            <ShoppingCart size={20}/>
+                            <span>רכוש מנוי והפץ</span>
+                            <div className="flex items-center gap-1 bg-white/20 px-2 rounded-full">
+                                {systemConfig?.pricing.originalPrice && systemConfig.pricing.originalPrice > (systemConfig.pricing.currentPrice || 150) && (
+                                    <span className="text-white/80 line-through text-xs decoration-white">₪{systemConfig.pricing.originalPrice}</span>
+                                )}
+                                <span>₪{systemConfig?.pricing.currentPrice || 150}/שנה</span>
+                            </div>
+                        </button>
+                    )}
                 </div>
             )}
 
-            {!currentUser && (
+            <Hero 
+                profile={profile} 
+                isAdmin={(currentUser && currentUser === profile.email) || (profile.isDraft && !profile.email)} 
+                onUpdateProfile={handleUpdateProfile}
+                onPlayStory={() => setShowStory(true)}
+                isCandleLit={isCandleLit}
+                setIsCandleLit={setIsCandleLit}
+                onShowQR={() => setShowQRModal(true)}
+            />
+
+            <main className="pb-8 relative flex-grow bg-stone-50">
+                <div className="text-center mt-12 mb-8 px-4">
+                <h2 className="text-3xl font-serif-hebrew text-stone-800">{projectName}</h2>
+                <p className="text-stone-500 mt-2">מסע בזמן דרך רגעים, תמונות וזכרונות</p>
+                </div>
+
+                <Timeline 
+                memories={profile.memories || []} 
+                isAdmin={(currentUser && currentUser === profile.email) || (profile.isDraft && !profile.email)} 
+                onDelete={handleDeleteMemory}
+                onEdit={(m) => setEditingMemory(m)}
+                onAddMemory={() => setShowMemoryForm(true)}
+                />
+            </main>
+
+            {profile.familyMembers && profile.familyMembers.length > 0 && (
+                <RelatedProfiles relatedPeople={profile.familyMembers} />
+            )}
+            
+            <footer className="bg-stone-100 text-stone-500 py-6 text-center text-sm border-t border-stone-200 mt-auto">
                 <button 
-                    onClick={handleSaveRequest}
-                    className="bg-amber-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-sm"
+                    onClick={() => setShowPrivacyModal(true)}
+                    className="hover:text-stone-800 transition-colors underline decoration-stone-300 hover:decoration-stone-800"
                 >
-                    שמור טיוטה
+                    תנאי שימוש ומדיניות פרטיות
+                </button>
+            </footer>
+
+            {((currentUser && currentUser === profile.email) || (profile.isDraft && !profile.email) || profile.isPublic) && (
+                <button
+                    onClick={() => setShowMemoryForm(true)}
+                    className="fixed bottom-24 md:bottom-8 left-8 bg-amber-600 text-white p-4 rounded-full shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 z-30 flex items-center justify-center group"
+                    title="הוסף זיכרון"
+                >
+                    <Plus size={32} />
                 </button>
             )}
-            </div>
-        </div>
-      </nav>
 
-      {/* Trial / Payment Banner */}
-      {isAdmin && !profile.isPublic && (
-          <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white text-stone-900 p-4 flex flex-col md:flex-row items-center justify-between gap-4 border-t-4 border-amber-500 shadow-2xl animate-in slide-in-from-bottom-full">
-              <div className="flex items-center gap-3">
-                  <div className="bg-amber-100 p-2 rounded-full text-amber-600">
-                      <ShieldAlert size={24} />
-                  </div>
-                  <div>
-                      <h3 className="font-bold text-lg text-stone-800">מצב טיוטה (פרטי)</h3>
-                      <p className="text-stone-500 text-sm">האתר אינו גלוי לציבור. {profile.accountType === 'free' ? 'לחץ על הכפתור כדי לפרסם אותו.' : 'כדי לשתף אותו, יש להפעיל מנוי.'}</p>
-                  </div>
-              </div>
-              
-              {profile.accountType === 'free' ? (
-                  <button 
-                    onClick={handleFreePublish}
-                    className="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
-                  >
-                      <CheckCircle size={20}/>
-                      פרסם אתר (ללא עלות)
-                  </button>
-              ) : (
-                  <button 
-                    onClick={() => {
-                        if(!currentUser) {
-                            setAuthMode('save');
-                            setShowAuthModal(true);
-                        } else {
-                            setShowPaymentModal(true);
-                        }
-                    }}
-                    className="bg-amber-500 hover:bg-amber-400 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 whitespace-nowrap"
-                  >
-                      <ShoppingCart size={20}/>
-                      <span>רכוש מנוי והפץ</span>
-                      <div className="flex items-center gap-1 bg-white/20 px-2 rounded-full">
-                          {originalPrice > currentPrice && (
-                            <span className="text-white/80 line-through text-xs decoration-white">₪{originalPrice}</span>
-                          )}
-                          <span>₪{currentPrice}/שנה</span>
-                      </div>
-                  </button>
-              )}
+            {/* Modals for Profile View */}
+            {(showMemoryForm || editingMemory) && (
+                <MemoryForm
+                isAdmin={(currentUser && currentUser === profile.email) || (profile.isDraft && !profile.email)}
+                initialData={editingMemory || undefined}
+                onCancel={() => {
+                    setShowMemoryForm(false);
+                    setEditingMemory(null);
+                }}
+                onSubmit={editingMemory ? handleEditMemory : handleAddMemory}
+                />
+            )}
+
+            {showStory && (
+                <StoryViewer 
+                profile={profile}
+                memories={[...(profile.memories || [])].sort((a,b) => a.year - b.year)} 
+                onClose={() => setShowStory(false)} 
+                />
+            )}
+
+            {showAuthModal && (
+                <AuthModal 
+                    isSavingDraft={authMode === 'save'}
+                    onSuccess={handleAuthSuccess}
+                    onCancel={() => setShowAuthModal(false)}
+                />
+            )}
+
+            {showPaymentModal && profile && (
+                <PaymentModal 
+                    profileName={profile.fullName}
+                    price={systemConfig?.pricing.currentPrice || 150}
+                    originalPrice={systemConfig?.pricing.originalPrice || 300}
+                    onSuccess={handlePaymentSuccess}
+                    onCancel={() => setShowPaymentModal(false)}
+                />
+            )}
+
+            {showPrivacyModal && <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />}
+            
+            {showQRModal && profile && (
+                <QRCodeModal 
+                    url={window.location.href}
+                    name={profile.fullName}
+                    projectName={projectName}
+                    onClose={() => setShowQRModal(false)}
+                />
+            )}
           </div>
-      )}
-
-      {/* Hero Section */}
-      <Hero 
-        profile={profile} 
-        isAdmin={isAdmin} 
-        onUpdateProfile={handleUpdateProfile}
-        onPlayStory={() => setShowStory(true)}
-        isCandleLit={isCandleLit}
-        setIsCandleLit={setIsCandleLit}
-        onShowQR={() => setShowQRModal(true)}
-      />
-
-      {/* Main Content - Timeline */}
-      <main className="pb-8 relative flex-grow bg-stone-50">
-        <div className="text-center mt-12 mb-8 px-4">
-           <h2 className="text-3xl font-serif-hebrew text-stone-800">{projectName}</h2>
-           <p className="text-stone-500 mt-2">מסע בזמן דרך רגעים, תמונות וזכרונות</p>
-        </div>
-
-        <Timeline 
-          memories={profile.memories || []} 
-          isAdmin={isAdmin} 
-          onDelete={handleDeleteMemory}
-          onEdit={(m) => setEditingMemory(m)}
-          onAddMemory={() => setShowMemoryForm(true)}
-        />
-      </main>
-
-      {/* Related Profiles */}
-      {profile.familyMembers && profile.familyMembers.length > 0 && (
-        <RelatedProfiles relatedPeople={profile.familyMembers} />
-      )}
-      
-      {/* App Footer */}
-      <footer className="bg-stone-100 text-stone-500 py-6 text-center text-sm border-t border-stone-200 mt-auto">
-          <button 
-             onClick={() => setShowPrivacyModal(true)}
-             className="hover:text-stone-800 transition-colors underline decoration-stone-300 hover:decoration-stone-800"
-          >
-             תנאי שימוש ומדיניות פרטיות
-          </button>
-      </footer>
-
-      {(isAdmin || profile.isPublic) && (
-          <button
-            onClick={() => setShowMemoryForm(true)}
-            className="fixed bottom-24 md:bottom-8 left-8 bg-amber-600 text-white p-4 rounded-full shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 z-30 flex items-center justify-center group"
-            title="הוסף זיכרון"
-          >
-            <Plus size={32} />
-          </button>
-      )}
-
-      {/* Modals */}
-      {(showMemoryForm || editingMemory) && (
-        <MemoryForm
-          isAdmin={isAdmin}
-          initialData={editingMemory || undefined}
-          onCancel={() => {
-            setShowMemoryForm(false);
-            setEditingMemory(null);
-          }}
-          onSubmit={editingMemory ? handleEditMemory : handleAddMemory}
-        />
-      )}
-
-      {showStory && (
-        <StoryViewer 
-          profile={profile}
-          memories={[...(profile.memories || [])].sort((a,b) => a.year - b.year)} 
-          onClose={() => setShowStory(false)} 
-        />
-      )}
-
-      {showAuthModal && (
-          <AuthModal 
-            isSavingDraft={authMode === 'save'}
-            onSuccess={handleAuthSuccess}
-            onCancel={() => setShowAuthModal(false)}
-          />
-      )}
-
-      {showPaymentModal && profile && (
-          <PaymentModal 
-            profileName={profile.fullName}
-            price={currentPrice}
-            originalPrice={originalPrice}
-            onSuccess={handlePaymentSuccess}
-            onCancel={() => setShowPaymentModal(false)}
-          />
-      )}
-
-      {showPrivacyModal && <PrivacyPolicyModal onClose={() => setShowPrivacyModal(false)} />}
-      
-      {showQRModal && profile && (
-        <QRCodeModal 
-            url={window.location.href}
-            name={profile.fullName}
-            projectName={projectName}
-            onClose={() => setShowQRModal(false)}
-        />
-      )}
+       ) : (
+          <div className="h-screen flex items-center justify-center bg-stone-50 text-amber-600">טוען נתונים...</div>
+       )}
     </div>
   );
 };
