@@ -91,7 +91,8 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
       </nav>
 
       {/* --- SECTION 1: HERO / INTRO --- */}
-      <header className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden border-b border-stone-200">
+      {/* Changed to py-32 to allow content to grow naturally without overlap */}
+      <header className="relative py-32 md:py-40 flex items-center justify-center overflow-hidden border-b border-stone-200">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
              <img 
@@ -103,18 +104,18 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
              <div className="absolute inset-0 bg-gradient-to-t from-stone-50 via-white/20 to-white/60"></div>
           </div>
 
-          <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-             <div className="flex justify-center mb-6">
+          <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+             <div className="flex justify-center mb-8">
                  <span className="bg-white/80 backdrop-blur-md text-amber-700 border border-amber-200 px-4 py-1.5 rounded-full text-sm font-bold tracking-wider uppercase flex items-center gap-2 shadow-sm">
                     <Heart size={14} fill="currentColor" /> פשוט. מכובד. מרגש.
                  </span>
              </div>
              
-             <h1 className="text-5xl md:text-7xl font-serif-hebrew font-bold mb-4 leading-tight text-stone-900 drop-shadow-sm">
+             <h1 className="text-5xl md:text-7xl font-serif-hebrew font-bold mb-6 leading-tight text-stone-900 drop-shadow-sm">
                 זהו אתר ליצירת אתרי הנצחה לאהובים
              </h1>
              
-             <p className="text-xl md:text-3xl text-stone-600 mb-8 font-light leading-relaxed max-w-4xl mx-auto">
+             <p className="text-xl md:text-3xl text-stone-600 mb-10 font-light leading-relaxed max-w-4xl mx-auto">
                 בקלות ובפשטות, בשיתוף עם משפחה וחברים, <br className="hidden md:block"/>
                 יוצרים יחד <span className="text-amber-600 font-bold border-b-2 border-amber-300">עץ חיים</span> להנצחת יקירנו.
              </p>
@@ -132,7 +133,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
       </header>
 
       {/* --- SECTION 2: COMMUNITY SHOWCASE (Side-by-Side Layout) --- */}
-      <section className="bg-white py-12 px-4 md:px-12 flex-1 relative overflow-hidden border-t border-stone-200">
+      <section className="bg-white py-16 md:py-24 px-4 md:px-12 flex-1 relative overflow-hidden border-t border-stone-200">
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-stone-50 to-transparent pointer-events-none"></div>
 

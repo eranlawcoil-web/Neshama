@@ -208,9 +208,9 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
         .candle-glass {
             width: 100%;
             height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.2) 40%, rgba(255,255,255,0.2) 60%, rgba(255,255,255,0.4) 100%);
-            border: 1px solid rgba(0,0,0,0.1);
-            border-bottom: 3px solid rgba(0,0,0,0.1);
+            background: linear-gradient(to right, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.1) 60%, rgba(255,255,255,0.3) 100%);
+            border: 1px solid rgba(100,100,100,0.2); /* Darker border for light BG */
+            border-bottom: 3px solid rgba(100,100,100,0.2);
             border-radius: 4px;
             position: relative;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -277,7 +277,7 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
              left: 10%;
              width: 5px;
              height: 60%;
-             background: rgba(255,255,255,0.6);
+             background: rgba(255,255,255,0.7);
              border-radius: 10px;
              filter: blur(1px);
         }
@@ -290,7 +290,7 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
             transform: translateX(-50%);
             width: 120px;
             height: 120px;
-            background: radial-gradient(circle, rgba(255,160,0,0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255,160,0,0.2) 0%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
             animation: glow-pulse 3s infinite ease-in-out;
@@ -327,15 +327,15 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
             title={isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר זיכרון'}
         >
              <div className="candle-glow"></div>
-             <div className="candle-glass bg-white/40 backdrop-blur-md border-white/50">
+             <div className="candle-glass bg-white/20 backdrop-blur-md">
                 <div className="glass-reflection"></div>
-                <div className="candle-wax bg-stone-100"></div>
+                <div className="candle-wax bg-stone-100 border-t border-stone-200"></div>
                 <div className="candle-wick"></div>
                 <div className="flame"></div>
              </div>
         </div>
         
-        <span className={`mt-2 text-[10px] md:text-xs font-bold transition-all duration-700 text-center max-w-[100px] leading-tight px-2 py-1 rounded-full ${isCandleLit ? 'text-amber-700 bg-amber-50 shadow-sm border border-amber-100' : 'text-stone-500 bg-white/60 border border-stone-200'}`}>
+        <span className={`mt-2 text-[10px] md:text-xs font-bold transition-all duration-700 text-center max-w-[100px] leading-tight px-2 py-1 rounded-full ${isCandleLit ? 'text-amber-700 bg-amber-50 shadow-sm border border-amber-100' : 'text-stone-600 bg-white/80 border border-stone-300 shadow-sm'}`}>
              {isCandleLit ? 'נר זיכרון דולק' : 'הדלק נר לעילוי הנשמה'}
         </span>
       </div>
