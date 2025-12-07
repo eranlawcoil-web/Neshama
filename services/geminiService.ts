@@ -1,9 +1,18 @@
 import { GoogleGenAI } from "@google/genai";
 
 const getClient = () => {
-  const apiKey = process.env.API_KEY;
+  // Safe access check to prevent "process is not defined" crash in browser
+  let apiKey = '';
+  try {
+    if (typeof process !== 'undefined' && process.env) {
+      apiKey = process.env.API_KEY || '';
+    }
+  } catch (e) {
+    console.warn("Environment variables not accessible");
+  }
+
   if (!apiKey) {
-    console.error("API_KEY is missing");
+    console.warn("API_KEY is missing or environment not configured");
     return null;
   }
   return new GoogleGenAI({ apiKey });
@@ -11,7 +20,7 @@ const getClient = () => {
 
 export const generateTribute = async (name: string, keywords: string): Promise<string> => {
   const ai = getClient();
-  if (!ai) return "המערכת אינה מחוברת ל-AI כעת.";
+  if (!ai) return "המערכת אינה מחוברת ל-AI כעת (חסר מפתח API).";
 
   try {
     const prompt = `
