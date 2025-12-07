@@ -91,7 +91,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
       </nav>
 
       {/* --- SECTION 1: HERO / INTRO --- */}
-      <header className="relative h-[65vh] min-h-[500px] flex items-center justify-center overflow-hidden border-b border-white/5">
+      <header className="relative h-[55vh] min-h-[450px] flex items-center justify-center overflow-hidden border-b border-white/5">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
              <img 
@@ -102,18 +102,18 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
              <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/60 to-black/60"></div>
           </div>
 
-          <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
              <div className="flex justify-center mb-6">
                  <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-4 py-1.5 rounded-full text-sm font-bold tracking-wider uppercase flex items-center gap-2">
                     <Heart size={14} fill="currentColor" /> פשוט. מכובד. מרגש.
                  </span>
              </div>
              
-             <h1 className="text-5xl md:text-7xl font-serif-hebrew font-bold mb-6 leading-tight text-white drop-shadow-2xl">
+             <h1 className="text-5xl md:text-7xl font-serif-hebrew font-bold mb-4 leading-tight text-white drop-shadow-2xl">
                 זהו אתר ליצירת אתרי הנצחה לאהובים
              </h1>
              
-             <p className="text-xl md:text-3xl text-stone-300 mb-10 font-light leading-relaxed max-w-4xl mx-auto">
+             <p className="text-xl md:text-3xl text-stone-300 mb-8 font-light leading-relaxed max-w-4xl mx-auto">
                 בקלות ובפשטות, בשיתוף עם משפחה וחברים, <br className="hidden md:block"/>
                 יוצרים יחד <span className="text-amber-400 font-bold">עץ חיים</span> להנצחת יקירנו.
              </p>
@@ -131,14 +131,14 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
       </header>
 
       {/* --- SECTION 2: COMMUNITY SHOWCASE (Side-by-Side Layout) --- */}
-      <section className="bg-stone-950 py-20 px-4 md:px-12 flex-1 relative overflow-hidden">
+      <section className="bg-stone-950 py-10 px-4 md:px-12 flex-1 relative overflow-hidden">
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-stone-900/50 to-transparent pointer-events-none"></div>
 
-          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
               
               {/* Right Side: Text & Navigation */}
-              <div className="md:col-span-5 flex flex-col justify-center space-y-8 z-10 text-right">
+              <div className="md:col-span-5 flex flex-col justify-center space-y-6 z-10 text-right">
                   <div>
                       <h2 className="text-3xl md:text-4xl font-serif-hebrew font-bold text-white mb-4 flex items-center gap-3">
                           <Users className="text-amber-500" size={32}/> 
@@ -192,7 +192,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
               </div>
 
               {/* Left Side: Slider Visual */}
-              <div className="md:col-span-7 w-full h-[400px] md:h-[500px] relative">
+              <div className="md:col-span-7 w-full h-[350px] md:h-[400px] relative">
                   <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-stone-800 bg-stone-900">
                       {displayProfiles.map((profile, index) => {
                             let positionClass = 'opacity-0 z-0 pointer-events-none translate-x-12'; 
