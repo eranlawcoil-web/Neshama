@@ -581,7 +581,7 @@ const Hero: React.FC<HeroProps> = ({ profile, isAdmin, onUpdateProfile, onPlaySt
 
             <div className="flex items-center gap-4 text-xl md:text-2xl text-stone-500 font-light tracking-widest mb-6 dir-ltr opacity-90">
               <span className="font-mono">{formatDate(profile.birthDate) || profile.birthYear}</span>
-              <span className="w-12 h-[1px] bg-stone-300"></span>
+              <span className="text-stone-300 font-light mx-2 text-2xl">|</span>
               <span className="font-mono">{formatDate(profile.deathDate) || profile.deathYear}</span>
             </div>
             

@@ -50,10 +50,11 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans flex flex-col">
       
       {/* Navbar - Absolute over Hero */}
-      <nav className="absolute top-0 left-0 right-0 z-50 flex flex-col md:flex-row justify-between items-center p-6 md:px-12 gap-4 bg-gradient-to-b from-white/90 to-transparent">
-         <div className="flex items-center gap-6">
+      <nav className="absolute top-0 left-0 right-0 z-50 flex flex-col md:flex-row justify-between items-center p-6 md:px-12 gap-4 bg-gradient-to-b from-white/90 to-transparent pointer-events-none">
+         {/* Top Row / Left Side (Desktop) */}
+         <div className="flex items-center justify-between w-full md:w-auto gap-6 pointer-events-auto">
              <div 
-               className="text-2xl font-serif-hebrew font-bold text-amber-600 tracking-wide cursor-pointer hover:text-amber-700 transition-colors drop-shadow-sm"
+               className="text-2xl font-serif-hebrew font-bold text-amber-600 tracking-wide cursor-pointer hover:text-amber-700 transition-colors drop-shadow-sm max-w-[60vw] truncate"
                onClick={() => window.location.reload()}
              >
                 {projectName}
@@ -64,7 +65,8 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
              </div>
          </div>
 
-         <div className="flex gap-4 md:gap-6 items-center w-full md:w-auto justify-between md:justify-end">
+         {/* Mobile Nav Row 2 */}
+         <div className="flex gap-4 md:gap-6 items-center w-full md:w-auto justify-between md:justify-end pointer-events-auto">
             <div className="md:hidden">
                <ProfileSearch onSelectProfile={onSelectProfile} variant="light" />
             </div>
@@ -91,8 +93,8 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
       </nav>
 
       {/* --- SECTION 1: HERO / INTRO --- */}
-      {/* Changed to py-32 to allow content to grow naturally without overlap */}
-      <header className="relative py-32 md:py-40 flex items-center justify-center overflow-hidden border-b border-stone-200">
+      {/* Reduced padding to py-24 to tighten layout */}
+      <header className="relative py-24 md:py-32 flex items-center justify-center overflow-hidden border-b border-stone-200">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
              <img 
@@ -104,7 +106,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
              <div className="absolute inset-0 bg-gradient-to-t from-stone-50 via-white/20 to-white/60"></div>
           </div>
 
-          <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
              <div className="flex justify-center mb-8">
                  <span className="bg-white/80 backdrop-blur-md text-amber-700 border border-amber-200 px-4 py-1.5 rounded-full text-sm font-bold tracking-wider uppercase flex items-center gap-2 shadow-sm">
                     <Heart size={14} fill="currentColor" /> פשוט. מכובד. מרגש.
@@ -133,7 +135,7 @@ const Landing: React.FC<LandingProps> = ({ profiles, projectName, onCreate, onLo
       </header>
 
       {/* --- SECTION 2: COMMUNITY SHOWCASE (Side-by-Side Layout) --- */}
-      <section className="bg-white py-16 md:py-24 px-4 md:px-12 flex-1 relative overflow-hidden border-t border-stone-200">
+      <section className="bg-white py-12 md:py-20 px-4 md:px-12 flex-1 relative overflow-hidden border-t border-stone-200">
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-stone-50 to-transparent pointer-events-none"></div>
 
